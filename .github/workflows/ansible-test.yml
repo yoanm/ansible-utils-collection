@@ -12,7 +12,7 @@ on:
       - master
   pull_request:
   # Run CI once a week (at 06:00 UTC on friday)
-  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-base version
+  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
   schedule:
     - cron: '0 6 * * 5'
 env:
@@ -58,7 +58,7 @@ jobs:
           python-version: 3.8
 
       # Install the head of the given branch (devel, stable-2.10)
-      - name: Install ansible-base (${{ matrix.ansible }})
+      - name: Install ansible-core (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
       # In this step, this action saves a list of existing images,
@@ -72,9 +72,9 @@ jobs:
         run: make configure-test-ansible
         if: ${{ matrix.ansible != 'stable-2.10' }}
 
-      - name: Build collection for ansible-base v2.10
-        # ansible-base v2.10 doesn't support installing fom current directory if it is not under NAMESPACE/NAME directories
-        run: make clean && make build && ansible-galaxy collection install -p ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")"
+      - name: Build collection for ansible-core v2.10
+        # ansible-core v2.10 doesn't support installing fom current directory if it is not under NAMESPACE/NAME directories
+        run: make clean && make build && ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && git init .
         if: ${{ matrix.ansible == 'stable-2.10' }}
 
       # run ansible-test sanity inside of Docker.
@@ -126,7 +126,7 @@ jobs:
 #          # will run on all python versions it supports.
 #          python-version: 3.8
 
-#      - name: Install ansible-base (${{ matrix.ansible }})
+#      - name: Install ansible-core (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
 #      - name: Build collection
@@ -204,7 +204,7 @@ jobs:
 #          # will run on all python versions it supports.
 #          python-version: 3.8
 
-#      - name: Install ansible-base (${{ matrix.ansible }})
+#      - name: Install ansible-core (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
 #      - name: Build collection
