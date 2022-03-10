@@ -70,6 +70,12 @@ jobs:
 
       - name: Build collection
         run: make configure-test-ansible
+        if: ${{ matrix.ansible != 'stable-2.10' }}
+
+      - name: Build collection for ansible-base v2.10
+        # ansible-base v2.10 doesn't support installing fom current directory if it is not under NAMESPACE/NAME directories
+        run: make clean && make build && ansible-galaxy collection install -p ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")"
+        if: ${{ matrix.ansible == 'stable-2.10' }}
 
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
