@@ -29,6 +29,7 @@ jobs:
   sanity:
     name: Sanity (Ⓐ${{ matrix.ansible }})
     strategy:
+      fail-fast: false
       matrix:
         ansible:
           # It's important that Sanity is tested against all stable-X.Y branches
@@ -46,8 +47,8 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v2
-        with:
-          path: ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+#        with:
+#          path: ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -63,16 +64,19 @@ jobs:
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
-      #- uses: satackey/action-docker-layer-caching@v0.0.11
+#      - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
-      #  continue-on-error: true
+#        continue-on-error: true
+
+      - name: Build collection
+        run: pwd && ansible-galaxy collection install -p build/ansible_collections --force -vvvv . # make configure-test-ansible
 
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --coverage
-        working-directory: ./ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+        run: pwd && ansible-test sanity --docker -v --color --coverage
+        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 
       # ansible-test support producing code coverage date
       - name: Generate coverage report
