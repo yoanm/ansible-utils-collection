@@ -60,10 +60,8 @@ class LookupBase(AnsibleLookupBase):
     def _execute_lookup(self, name, terms, variables, **kwargs):
         # type: (LookupBase, Text, List, Dict, **Dict) -> Any
         loader_kwargs = dict(loader=self._loader, templar=self._templar)
-        lookup_vars = append_collection_path_to_ansible_search_path(self.get_basedir(variables))
-        lookup_vars.update(variables)
 
-        return execute_lookup(name, terms=terms, lookup_vars=lookup_vars, lookup_kwargs=kwargs,
+        return execute_lookup(name, terms=terms, lookup_vars=variables, lookup_kwargs=kwargs,
                               loader_kwargs=loader_kwargs)
 
     def run(self, terms, variables=None, **kwargs):

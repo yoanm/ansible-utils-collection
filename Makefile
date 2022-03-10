@@ -37,7 +37,7 @@ configure-test-ansible: ## 🧪️ Deploy to the temporary build directory for t
 configure-test-ansible:
 	rm -rf ${COLLECTION_BUILD_DIR} # Remove only this collection directory (dependencies will be kept there if previously installed)
 	$(MAKE) install-local path="${ANSIBLE_COLLECTIONS_BUILD_DIR}"
-	cd ${COLLECTION_BUILD_DIR} && git init . # Workaround, ansible-test doesn't launch any test if current directory is not a git repo :/
+	cd ${COLLECTION_BUILD_DIR} && git init . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 ## —— 🇦 Ansible collection —————————————————————————————————————————————————
 ##               \_ 🛰️  Galaxy ——————————————————————————————————————————————

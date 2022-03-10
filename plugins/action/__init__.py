@@ -143,7 +143,7 @@ class ActionBase(AnsibleActionBase):
     def _execute_lookup(self, name, terms, variables, **kwargs):
         # type: (ActionBase, Text, List, Dict, **Dict) -> Any
         loader_kwargs = dict(loader=self._loader, templar=self._templar)
-        lookup_vars = append_collection_path_to_ansible_search_path(self._task.args.copy())
+        lookup_vars = self._task.args.copy()
         lookup_vars.update(variables)
 
         return execute_lookup(name, terms=terms, lookup_vars=lookup_vars, lookup_kwargs=kwargs,
