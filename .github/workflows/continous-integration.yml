@@ -5,10 +5,10 @@ on:
     branches:
       - master
   pull_request:
-  # Run CI once a week (at 06:00 UTC on friday)
+  # Run CI once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
   schedule:
-    - cron: '0 6 * * 5'
+    - cron: '0 6 12 * *'
 env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
