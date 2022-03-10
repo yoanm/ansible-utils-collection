@@ -23,7 +23,6 @@ jobs:
 ###
 # Python tests
 #
-
   python:
     name: Python tests
     runs-on: ubuntu-latest
@@ -35,7 +34,7 @@ jobs:
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       - name: Configure test environment
-        run: make configure-dev
+        run: make configure-test-env
       - name: Execute tests
         run: make test-python
   sanity:
@@ -64,11 +63,18 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
 #        continue-on-error: true
       - name: Configure test environment
-        run: make configure-test-ansible
+        run: make configure-test-env
+      - name: Build collection for testing
+        run: make build-for-test
         if: ${{ matrix.ansible != 'stable-2.10' }}
-      - name: Configure test environment for ansible-core v2.10
+      - name: Build collection for testing (ansible-core v2.10)
         # ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
-        run: make clean && make build && ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && git init .
+        run: |
+          make configure-test-env && \
+          make build && \
+          ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && \
+          cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && \
+          git init -q .
         if: ${{ matrix.ansible == 'stable-2.10' }}
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
@@ -104,7 +110,9 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
 #        continue-on-error: true
       - name: Configure test environment
-        run: make configure-test-ansible
+        run: make configure-test-env
+      - name: Build collection for testing
+        run: make build-for-test
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
@@ -156,7 +164,9 @@ jobs:
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
 #      - name: Configure test environment
-#        run: make configure-test-ansible
+#        run: make configure-test-env
+#      - name: Build collection for testing
+#        run: make build-for-test
 
 #      # Run the unit tests
 #      - name: Run unit test
@@ -234,7 +244,9 @@ jobs:
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
 #      - name: Configure test environment
-#        run: make configure-test-ansible
+#        run: make configure-test-env
+#      - name: Build collection for testing
+#        run: make build-for-test
 
 #      # Run the integration tests
 #      - name: Run integration test

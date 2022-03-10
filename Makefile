@@ -13,7 +13,7 @@ COLLECTION_BUILD_DIR=${ANSIBLE_COLLECTIONS_BUILD_DIR}/${COLLECTION_NAMESPACE}/${
 
 .DEFAULT_GOAL = default
 
-default: clean configure-dev
+default: clean configure-dev-env
 
 ## —— 📚 Help ——————————————————————————————————————————————————————————————
 .PHONY: help
@@ -26,18 +26,15 @@ clean: ## 🧹 Clean generated contents
 clean:
 	rm -rf ${BUILD_DIR}/* tests/output .mypy_cache ${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-*.tar.gz
 
-.PHONY: configure-dev
-configure-dev: ## 🤖 Install collection's required libraries to current python environment
-configure-dev:
-	$(PYTHON) -m pip install -r tests/requirements.txt # Install tests requirements
+.PHONY: configure-dev-env
+configure-dev-env: ## 🤖 Install required libraries for dev environment (python libs used on codebase)
+configure-dev-env:
 	$(PYTHON) -m pip install -r meta/ee-requirements.txt # Install internal requirements
 
-.PHONY: configure-test-ansible
-configure-test-ansible: ## 🧪️ Deploy to the temporary build directory for test usage
-configure-test-ansible:
-	rm -rf ${COLLECTION_BUILD_DIR} # Remove only this collection directory (dependencies will be kept there if previously installed)
-	$(MAKE) install-local path="${ANSIBLE_COLLECTIONS_BUILD_DIR}"
-	cd ${COLLECTION_BUILD_DIR} && git init . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
+.PHONY: configure-test-env
+configure-test-env: ## 🤖 Install required libraries for test environment (libs used on codebase, MyPy, etc)
+configure-test-env: configure-dev-env
+	$(PYTHON) -m pip install -r tests/requirements.txt # Install tests requirements
 
 ## —— 🇦 Ansible collection —————————————————————————————————————————————————
 ##               \_ 🛰️  Galaxy ——————————————————————————————————————————————
@@ -46,6 +43,13 @@ build: ## 🗜️  Build for galaxy deployment (creates a tar.gz file)
 build: clean
 	@$(eval o ?=)
 	ansible-galaxy collection build $(o) .
+
+.PHONY: build-for-test
+build-for-test: ## 🧪️ Deploy to the temporary build directory for test usage
+build-for-test:
+	rm -rf ${COLLECTION_BUILD_DIR} # Remove only this collection directory (dependencies will be kept there if previously installed)
+	$(MAKE) install-local path="${ANSIBLE_COLLECTIONS_BUILD_DIR}"
+	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 .PHONY: install
 install: ## ✍️  Install to default ansible collections directory (to use the collection inside a playbook for instance)
@@ -97,7 +101,7 @@ test-mypy:
 ##               \_ 🇦 Ansible tests ————————————————————————————————————————
 .PHONY: test-ansible
 test-ansible: ## 🏃 Launch ansible-related tests (unit, integration and sanity tests)
-test-ansible: configure-test-ansible test-ansible-sanity
+test-ansible: build-for-test test-ansible-sanity
 
 .PHONY: test-ansible-unit
 test-ansible-unit: ## 🏃 Launch ansible unit tests
