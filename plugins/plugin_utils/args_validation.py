@@ -9,10 +9,13 @@ from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_valid
 MYPY = False
 if MYPY:
     from typing import Tuple, Union, Optional, Dict, List, Text
-
-ValidateArgsResult = Tuple[bool, List, Dict]
-ValidateArgsSchema = Union[Dict, Text]
-ValidateArgsSchemaConditionals = Optional[Dict]
+    ValidateArgsResult = Tuple[bool, List, Dict]
+    ValidateArgsSchema = Union[Dict, Text]
+    ValidateArgsSchemaConditionals = Optional[Dict]
+else:
+    ValidateArgsResult = None
+    ValidateArgsSchema = None
+    ValidateArgsSchemaConditionals = None
 
 
 def validate_args(caller, args, schema, schema_format='doc', schema_conditionals=None):
