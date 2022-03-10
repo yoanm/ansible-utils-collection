@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-__metaclass__ = type
 
-from typing import Optional, Text, List, Dict, Any
+__metaclass__ = type
 
 from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from ansible.plugins.loader import lookup_loader, action_loader
 from ansible.plugins.lookup import LookupBase
 from ansible.utils.unsafe_proxy import wrap_var
+
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Optional, Text, List, Dict, Any
 
 
 def execute_action(name, task_vars, loader_args=None, loader_kwargs=None):
