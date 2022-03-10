@@ -34,15 +34,12 @@ jobs:
         uses: actions/setup-python@v2
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      - name: Configure test environment
+        run: make configure-dev
       - name: Execute tests
-        run: make configure-dev && make test-python
-###
-# Sanity tests (REQUIRED)
-#
-# https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
-
+        run: make test-python
   sanity:
-    needs: [python] # Prevent bunch of jobs to be triggered if python tests fail
+    needs: [python] # Prevent a bunch of jobs to be triggered if python tests fail
     name: Sanity (Ⓐ ${{ matrix.ansible }})
     strategy:
       matrix:
@@ -66,11 +63,11 @@ jobs:
 #      - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
 #        continue-on-error: true
-      - name: Build collection
+      - name: Configure test environment
         run: make configure-test-ansible
         if: ${{ matrix.ansible != 'stable-2.10' }}
-      - name: Build collection for ansible-core v2.10
-        # ansible-core v2.10 doesn't support installing fom current directory if it is not under NAMESPACE/NAME directories
+      - name: Configure test environment for ansible-core v2.10
+        # ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
         run: make clean && make build && ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && git init .
         if: ${{ matrix.ansible == 'stable-2.10' }}
       # run ansible-test sanity inside of Docker.
@@ -90,14 +87,6 @@ jobs:
   sanity-devel:
     needs: [sanity] # Prevent sanity tests on devel branch if they already fail on stable branches
     name: Sanity (Ⓐ devel)
-    strategy:
-      fail-fast: false
-      matrix:
-        ansible:
-          - stable-2.10
-          - stable-2.11
-          - stable-2.12
-          - devel
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -114,7 +103,7 @@ jobs:
 #      - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
 #        continue-on-error: true
-      - name: Build collection
+      - name: Configure test environment
         run: make configure-test-ansible
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
@@ -166,7 +155,7 @@ jobs:
 #      - name: Install ansible-core (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
-#      - name: Build collection
+#      - name: Configure test environment
 #        run: make configure-test-ansible
 
 #      # Run the unit tests
@@ -244,7 +233,7 @@ jobs:
 #      - name: Install ansible-core (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
-#      - name: Build collection
+#      - name: Configure test environment
 #        run: make configure-test-ansible
 
 #      # Run the integration tests
