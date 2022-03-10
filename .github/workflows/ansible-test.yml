@@ -69,7 +69,7 @@ jobs:
 #        continue-on-error: true
 
       - name: Build collection
-        run: pwd && ansible-galaxy collection install -p build/ansible_collections --force -vvvv . # make configure-test-ansible
+        run: make configure-test-ansible
 
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
@@ -81,7 +81,7 @@ jobs:
       # ansible-test support producing code coverage date
       - name: Generate coverage report
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-        working-directory: ./ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 
 #      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
 #      - uses: codecov/codecov-action@v2
