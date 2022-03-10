@@ -4,11 +4,15 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import os.path
-from typing import Text, Optional, Dict, List
 
 from ansible.plugins.loader import lookup_loader
 from ansible.plugins.lookup import LookupBase
 from ansible_collections.ansible.utils.plugins.module_utils.common.utils import to_list
+
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Text, Optional, Dict, List
 
 
 def get_collection_path(c_full_name):

@@ -7,8 +7,6 @@ import base64
 import os.path
 from abc import abstractmethod
 from random import getrandbits
-from typing import Text, Optional, Dict, Any, List
-from typing import Type
 
 from ansible.errors import AnsibleActionFail
 from ansible.module_utils.common.dict_transformations import dict_merge
@@ -25,6 +23,11 @@ from ..plugin_utils.args_validation import validate_args, ValidateArgsResult, Va
 from ..plugin_utils.execute_plugins import execute_action, execute_lookup
 from ..plugin_utils.path import append_collection_path_to_ansible_search_path, \
     get_collection_path
+
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Text, Optional, Dict, Any, List, Type
 
 
 class ActionBase(AnsibleActionBase):

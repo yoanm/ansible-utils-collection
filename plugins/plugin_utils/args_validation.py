@@ -3,13 +3,19 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
-from typing import Tuple, Union, Optional, Dict, List, Text
-
 from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_validate import AnsibleArgSpecValidator
 
-ValidateArgsResult = Tuple[bool, List, Dict]
-ValidateArgsSchema = Union[Dict, Text]
-ValidateArgsSchemaConditionals = Optional[Dict]
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Tuple, Union, Optional, Dict, List, Text
+    ValidateArgsResult = Tuple[bool, List, Dict]
+    ValidateArgsSchema = Union[Dict, Text]
+    ValidateArgsSchemaConditionals = Optional[Dict]
+else:
+    ValidateArgsResult = None
+    ValidateArgsSchema = None
+    ValidateArgsSchemaConditionals = None
 
 
 def validate_args(caller, args, schema, schema_format='doc', schema_conditionals=None):

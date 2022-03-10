@@ -4,9 +4,6 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from abc import abstractmethod
-from typing import Text, Optional, Dict, Any, List
-from typing import Tuple
-from typing import Type
 
 from ansible.errors import AnsibleLookupError
 from ansible.parsing.dataloader import DataLoader
@@ -17,6 +14,11 @@ from ..plugin_utils.args_validation import ValidateArgsResult, validate_args, \
     ValidateArgsSchema
 from ..plugin_utils.execute_plugins import execute_lookup
 from ..plugin_utils.path import append_collection_path_to_ansible_search_path
+
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Text, Optional, Dict, Any, List, Tuple, Type
 
 
 class LookupBase(AnsibleLookupBase):

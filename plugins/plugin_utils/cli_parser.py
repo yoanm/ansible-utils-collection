@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
-__metaclass__ = type
 
-from typing import Text, Optional, Dict, Any
+__metaclass__ = type
 
 from ansible.module_utils.common.text.converters import to_text
 from ansible_collections.ansible.netcommon.plugins.sub_plugins.cli_parser.native_parser import CliParser
+
+# Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
+MYPY = False
+if MYPY:
+    from typing import Text, Optional, Dict, Any
 
 
 def native_cli_parse(text, tmpl_path, task_vars=None, debug=False):
