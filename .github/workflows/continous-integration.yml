@@ -18,6 +18,9 @@ env:
   PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies even if already there  (avoid CI being stuck on cached version forever)
 
 
+concurrency:
+  group: ci-${{ github.ref || github.head_ref }}
+  cancel-in-progress: ${{ github.ref != 'master' }}
 jobs:
 ###
 # Unit tests (OPTIONAL)
@@ -68,6 +71,7 @@ jobs:
   sanity:
     name: Sanity ${{ matrix.ansible }} branch
     strategy:
+      fail-fast: ${{ github.ref != 'master' }}
       matrix:
         ansible:
           - stable-2.10
