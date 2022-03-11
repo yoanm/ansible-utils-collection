@@ -37,7 +37,6 @@ jobs:
 #          - stable-2.11
 #          - stable-2.12
 #          - devel
-
 #    steps:
 #      - name: Check out code
 #        uses: actions/checkout@v2
@@ -53,10 +52,9 @@ jobs:
 #        run: make build-for-test
 #      # Run the unit tests
 #      - name: Run unit test
-#        run: make test-ansible-units
+#        run: make test-ansible-units unit_o="-v --color --docker --coverage"
 #      - name: Generate coverage report
-#        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-#        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+#        run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
 #      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
 #      - name: Upload coverage to codecov
 #        uses: codecov/codecov-action@v2
@@ -96,23 +94,11 @@ jobs:
         if: ${{ matrix.ansible == 'devel' }}
         run: make test-python
       - name: Build collection for testing
-        if: ${{ matrix.ansible != 'stable-2.10' }}
         run: make build-for-test
-      - name: Build collection for testing (ansible-core v2.10)
-        if: ${{ matrix.ansible == 'stable-2.10' }}
-        # ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
-        run: |
-          make configure-test-env && \
-          make build && \
-          ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && \
-          cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && \
-          git init -q .
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --coverage
-        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+        run: make test-ansible-sanity sanity_o="--docker -v --color --coverage"
       - name: Generate coverage report
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+        run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
       # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
@@ -173,11 +159,10 @@ jobs:
 #        run: make build-for-test
 #      # Run the integration tests
 #      - name: Run integration test
-#        run: ansible-test integration -v --color --retry-on-error --continue-on-error --diff --python ${{ matrix.python }} --docker --coverage
+#        run: make test-ansible-integration integration_o="-v --color --retry-on-error --continue-on-error --diff --python ${{ matrix.python }} --docker --coverage"
 #        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 #      - name: Generate coverage report
-#        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-#        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
+#        run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
 #      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
 #      - name: Upload coverage to codecov
 #        uses: codecov/codecov-action@v2
