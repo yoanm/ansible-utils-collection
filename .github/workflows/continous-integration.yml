@@ -27,12 +27,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          cache: 'pip'
+          cache: 'pip' # Cache pip install directory
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-python-tests
+          path: ${{env.RUNNER_TOOL_CACHE}}/Python/
+          key: ${{env.RUNNER_TOOL_CACHE}}-Python-python-tests
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       - name: Configure test environment
@@ -98,12 +98,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-          cache: 'pip'
+          cache: 'pip' # Cache pip install directory
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-ansible-${{ matrix.ansible }}
+          path: ${{env.RUNNER_TOOL_CACHE}}/Python/
+          key: ${{env.RUNNER_TOOL_CACHE}}-Python-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
       # In this step, this action saves a list of existing images,
@@ -154,12 +154,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-          cache: 'pip'
+          cache: 'pip' # Cache pip install directory
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-ansible-devel
+          path: ${{env.RUNNER_TOOL_CACHE}}/Python/
+          key: ${{env.RUNNER_TOOL_CACHE}}-Python-ansible-devel
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
