@@ -122,10 +122,10 @@ jobs:
       - name: Generate coverage report
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
-#      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-#      - uses: codecov/codecov-action@v2
-#        with:
-#          fail_ci_if_error: false
+      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
+      - uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false
   sanity-devel:
     needs: [sanity] # Prevent sanity tests on devel branch if they already fail on stable branches
     name: Sanity (Ⓐ devel)
