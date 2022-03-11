@@ -13,51 +13,21 @@ env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
   CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
-  ROOT_PYTHON_VERSION: "3.10"
   ## Pip options
-  PIP_CACHE_DIR: ~/.cache/pip # Pip data cache
-  PIP_UPGRADE: yes # Always use the newest version of a package (avoid CI being stuck on cached version forever)
-  PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies (avoid CI being stuck on cached version forever)
+  PIP_UPGRADE: yes # Always use the newest version of a package even if already there (avoid CI being stuck on cached version forever)
+  PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies even if already there  (avoid CI being stuck on cached version forever)
   PIP_VERBOSE: 1 # DEBUG
 
 
 jobs:
 ###
-# Python tests
-#
-  python:
-    name: Python tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{env.ROOT_PYTHON_VERSION}}
-#      - name: Pip cache
-#        uses: actions/cache@v2
-#        with:
-#          path: ${{env.PIP_CACHE_DIR}}
-#          key: ${{env.CACHE_VERSION}}-pip-cache-python
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.pythonLocation}}
-          key: ${{env.CACHE_VERSION}}-python-cache-python
-      - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
-      - name: Configure test environment
-        run: make configure-test-env
-      - name: Execute tests
-        run: make test-python
-###
 # Unit tests (OPTIONAL)
 #
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_units.html
+#
 #  units:
 #    runs-on: ubuntu-latest
-#    name: Units (Ⓐ${{ matrix.ansible }})
+#    name: Units ${{ matrix.ansible }} branch
 #    strategy:
 #      # As soon as the first unit test fails, cancel the others to free up the CI queue
 #      fail-fast: true
@@ -76,7 +46,7 @@ jobs:
 #        uses: actions/setup-python@v2
 #        with:
 #          python-version: 3.8
-#      - name: Install ansible-core (${{ matrix.ansible }})
+#      - name: Install ansible (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 #      - name: Configure test environment
 #        run: make configure-test-env
@@ -89,55 +59,48 @@ jobs:
 #        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
 #        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 #      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-#      - uses: codecov/codecov-action@v2
+#      - name: Upload coverage to codecov
+#        uses: codecov/codecov-action@v2
 #        with:
 #          fail_ci_if_error: false
+###
+# Sanity tests (REQUIRED)
+#
+# https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
+
   sanity:
-    needs: [python] # Prevent a bunch of jobs to be triggered if python tests fail
     name: Sanity ${{ matrix.ansible }} branch
     strategy:
-      fail-fast: false # Keep running other node from the matrix if one failed (errors may be different from node to node)
       matrix:
         ansible:
           - stable-2.10
           - stable-2.11
           - stable-2.12
+          - devel
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
-        with:
-          python-version: ${{env.ROOT_PYTHON_VERSION}}
-#      - name: Pip cache
-#        uses: actions/cache@v2
-#        with:
-#          path: ${{env.PIP_CACHE_DIR}}
-#          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-${{ matrix.ansible }}
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.pythonLocation}}
-          key: ${{env.CACHE_VERSION}}-python-cache-ansible-${{ matrix.ansible }}
-      - name: Install ansible-core (${{ matrix.ansible }})
+      - name: Install ansible (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
-      # In this step, this action saves a list of existing images,
-      # the cache is created without them in the post run.
-      # It also restores the cache if it exists.
       - name: Docker cache
         uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
           key: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-{hash}
           restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-
       - name: Configure test environment
         run: make configure-test-env
+      - name: Execute python tests
+        if: ${{ matrix.ansible == 'devel' }}
+        run: make test-python
       - name: Build collection for testing
-        run: make build-for-test
         if: ${{ matrix.ansible != 'stable-2.10' }}
+        run: make build-for-test
       - name: Build collection for testing (ansible-core v2.10)
+        if: ${{ matrix.ansible == 'stable-2.10' }}
         # ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
         run: |
           make configure-test-env && \
@@ -145,10 +108,6 @@ jobs:
           ansible-galaxy collection install -p ./build/ansible_collections "$(find . -name "${{env.NAMESPACE}}-${{env.COLLECTION_NAME}}-*.tar.gz")" && \
           cd build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}} && \
           git init -q .
-        if: ${{ matrix.ansible == 'stable-2.10' }}
-      # run ansible-test sanity inside of Docker.
-      # The docker container has all the pinned dependencies that are required
-      # and all python versions ansible supports.
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --coverage
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
@@ -156,57 +115,8 @@ jobs:
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
       # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-      - uses: codecov/codecov-action@v2
-        with:
-          fail_ci_if_error: false
-  sanity-devel:
-    needs: [sanity] # Prevent sanity tests on devel branch if they already fail on stable branches
-    name: Sanity devel branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{env.ROOT_PYTHON_VERSION}}
-#      - name: Pip cache
-#        uses: actions/cache@v2
-#        with:
-#          path: ${{env.PIP_CACHE_DIR}}
-#          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-devel
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.pythonLocation}}
-          key: ${{env.CACHE_VERSION}}-python-cache-ansible-devel
-      - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
-      # In this step, this action saves a list of existing images,
-      # the cache is created without them in the post run.
-      # It also restores the cache if it exists.
-      - name: Docker cache
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-        with:
-          key: ${{env.CACHE_VERSION}}-docker-cache-ansible-devel-{hash}
-          restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-devel-
-      - name: Configure test environment
-        run: make configure-test-env
-      - name: Build collection for testing
-        run: make build-for-test
-      # run ansible-test sanity inside of Docker.
-      # The docker container has all the pinned dependencies that are required
-      # and all python versions ansible supports.
-      - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --coverage
-        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
-      - name: Generate coverage report
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
-      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-      - uses: codecov/codecov-action@v2
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v2
         with:
           fail_ci_if_error: false
 ###
@@ -218,7 +128,7 @@ jobs:
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 #  integration:
 #    runs-on: ubuntu-latest
-#    name: Integration (Ⓐ${{ matrix.ansible }}+py${{ matrix.python }})
+#    name: Integration ${{ matrix.ansible }}+py${{ matrix.python }}
 #    strategy:
 #      fail-fast: false
 #      matrix:
@@ -256,7 +166,7 @@ jobs:
 #        uses: actions/setup-python@v2
 #        with:
 #          python-version: 3.8
-#      - name: Install ansible-core (${{ matrix.ansible }})
+#      - name: Install ansible (${{ matrix.ansible }})
 #        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 #      - name: Configure test environment
 #        run: make configure-test-env
@@ -270,6 +180,7 @@ jobs:
 #        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
 #        working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 #      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-#      - uses: codecov/codecov-action@v2
+#      - name: Upload coverage to codecov
+#        uses: codecov/codecov-action@v2
 #        with:
 #          fail_ci_if_error: false
