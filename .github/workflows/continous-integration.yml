@@ -94,10 +94,13 @@ jobs:
         with:
           python-version: 3.8
       - name: Install ansible-core (${{ matrix.ansible }})
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
-
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
+      - name: DEBUG - discover site-package
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
       - name: DEBUG
         run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
+      - name: DEBUG - ENV
+        run: env
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
