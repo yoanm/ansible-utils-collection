@@ -13,7 +13,6 @@ env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
 
-
 jobs:
 ###
 # Python tests
@@ -99,6 +98,9 @@ jobs:
       - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
+        with:
+          key: foo-docker-cache-ansible-${{ matrix.ansible }}-{hash}
+          restore-keys: foo-docker-cache-ansible-${{ matrix.ansible }}-
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
@@ -146,6 +148,9 @@ jobs:
       - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
+        with:
+          key: foo-docker-cache-ansible-devel-{hash}
+          restore-keys: foo-docker-cache-ansible-devel-
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
