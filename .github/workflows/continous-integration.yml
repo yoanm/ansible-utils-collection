@@ -33,7 +33,7 @@ jobs:
         with:
           # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
           path: dirname $(dirname ${{env.pythonLocation}})
-          key: ${{env.pythonLocation}}-Python-python-tests
+          key: python_dir-python-tests
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       - name: Configure test environment
@@ -105,9 +105,9 @@ jobs:
         with:
           # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
           path: dirname $(dirname ${{env.pythonLocation}})
-          key: ${{env.pythonLocation}}-Python-ansible-${{ matrix.ansible }}
+          key: python_dir-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -162,7 +162,7 @@ jobs:
         with:
           # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
           path: dirname $(dirname ${{env.pythonLocation}})
-          key: ${{env.pythonLocation}}-Python-ansible-devel
+          key: python_dir-ansible-devel
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
