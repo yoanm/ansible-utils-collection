@@ -35,7 +35,7 @@ jobs:
 #          path: dirname $(dirname ${{env.pythonLocation}})
 #          key: python_dir-python-tests
       - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check -vv
       - name: Configure test environment
         run: make configure-test-env
       - name: Execute tests
@@ -66,7 +66,7 @@ jobs:
 #        with:
 #          python-version: 3.8
 #      - name: Install ansible-core (${{ matrix.ansible }})
-#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
 #      - name: Configure test environment
 #        run: make configure-test-env
 #      - name: Build collection for testing
@@ -107,7 +107,7 @@ jobs:
 #          path: dirname $(dirname ${{env.pythonLocation}})
 #          key: python_dir-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -164,7 +164,7 @@ jobs:
 #          path: dirname $(dirname ${{env.pythonLocation}})
 #          key: python_dir-ansible-devel
       - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check -vv
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -240,7 +240,7 @@ jobs:
 #        with:
 #          python-version: 3.8
 #      - name: Install ansible-core (${{ matrix.ansible }})
-#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
 #      - name: Configure test environment
 #        run: make configure-test-env
 #      - name: Build collection for testing
