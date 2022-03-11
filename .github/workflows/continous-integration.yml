@@ -35,11 +35,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{env.ROOT_PYTHON_VERSION}}
-      - name: Pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.PIP_CACHE_DIR}}
-          key: ${{env.CACHE_VERSION}}-pip-cache-python
+#      - name: Pip cache
+#        uses: actions/cache@v2
+#        with:
+#          path: ${{env.PIP_CACHE_DIR}}
+#          key: ${{env.CACHE_VERSION}}-pip-cache-python
       - name: Python cache
         uses: actions/cache@v2
         with:
@@ -110,11 +110,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{env.ROOT_PYTHON_VERSION}}
-      - name: Pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.PIP_CACHE_DIR}}
-          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-${{ matrix.ansible }}
+#      - name: Pip cache
+#        uses: actions/cache@v2
+#        with:
+#          path: ${{env.PIP_CACHE_DIR}}
+#          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-${{ matrix.ansible }}
       - name: Python cache
         uses: actions/cache@v2
         with:
@@ -170,11 +170,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{env.ROOT_PYTHON_VERSION}}
-      - name: Pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{env.PIP_CACHE_DIR}}
-          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-devel
+#      - name: Pip cache
+#        uses: actions/cache@v2
+#        with:
+#          path: ${{env.PIP_CACHE_DIR}}
+#          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-devel
       - name: Python cache
         uses: actions/cache@v2
         with:
