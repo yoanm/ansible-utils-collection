@@ -12,6 +12,14 @@ on:
 env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
+  CACHE_VERSION: 20220311 # To be able to create a new cache (change the date)
+  ROOT_PYTHON_VERSION: "3.10"
+  ## Pip options
+  PIP_CACHE_DIR: ~/.cache/pip # Pip data cache
+  PIP_UPGRADE: yes # Always use the newest version of a package (avoid CI being stuck on cached version forever)
+  PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies (avoid CI being stuck on cached version forever)
+  PIP_VERBOSE: 1 # DEBUG
+
 
 
 jobs:
@@ -27,15 +35,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          cache: 'pip' # Cache pip install directory
-#      - name: Python cache
-#        uses: actions/cache@v2
-#        with:
-#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-#          path: dirname $(dirname ${{env.pythonLocation}})
-#          key: python_dir-python-tests
+          python-version: ${{env.ROOT_PYTHON_VERSION}}
+      - name: Pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.PIP_CACHE_DIR}}
+          key: ${{env.CACHE_VERSION}}-pip-cache-python
+      - name: Python cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.LD_LIBRARY_PATH}}/python${{env.ROOT_PYTHON_VERSION}}/site-packages
+          key: ${{env.CACHE_VERSION}}-python-cache-python
       - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check -vv
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       - name: Configure test environment
         run: make configure-test-env
       - name: Execute tests
@@ -66,7 +78,7 @@ jobs:
 #        with:
 #          python-version: 3.8
 #      - name: Install ansible-core (${{ matrix.ansible }})
-#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
+#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 #      - name: Configure test environment
 #        run: make configure-test-env
 #      - name: Build collection for testing
@@ -98,16 +110,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
-          cache: 'pip' # Cache pip install directory
-#      - name: Python cache
-#        uses: actions/cache@v2
-#        with:
-#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-#          path: dirname $(dirname ${{env.pythonLocation}})
-#          key: python_dir-ansible-${{ matrix.ansible }}
+          python-version: ${{env.ROOT_PYTHON_VERSION}}
+      - name: Pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.PIP_CACHE_DIR}}
+          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-${{ matrix.ansible }}
+      - name: Python cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.LD_LIBRARY_PATH}}/python${{env.ROOT_PYTHON_VERSION}}/site-packages
+          key: ${{env.CACHE_VERSION}}-python-cache-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -116,8 +131,8 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: foo-docker-cache-ansible-${{ matrix.ansible }}-{hash}
-          restore-keys: foo-docker-cache-ansible-${{ matrix.ansible }}-
+          key: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
@@ -155,16 +170,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
-          cache: 'pip' # Cache pip install directory
-#      - name: Python cache
-#        uses: actions/cache@v2
-#        with:
-#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-#          path: dirname $(dirname ${{env.pythonLocation}})
-#          key: python_dir-ansible-devel
+          python-version: ${{env.ROOT_PYTHON_VERSION}}
+      - name: Pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.PIP_CACHE_DIR}}
+          key: ${{env.CACHE_VERSION}}-pip-cache-ansible-devel
+      - name: Python cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.LD_LIBRARY_PATH}}/python${{env.ROOT_PYTHON_VERSION}}/site-packages
+          key: ${{env.CACHE_VERSION}}-python-cache-ansible-devel
       - name: Install ansible-core (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check -vv
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -173,8 +191,8 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: foo-docker-cache-ansible-devel-{hash}
-          restore-keys: foo-docker-cache-ansible-devel-
+          key: ${{env.CACHE_VERSION}}-docker-cache-ansible-devel-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-devel-
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
@@ -240,7 +258,7 @@ jobs:
 #        with:
 #          python-version: 3.8
 #      - name: Install ansible-core (${{ matrix.ansible }})
-#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -vv
+#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 #      - name: Configure test environment
 #        run: make configure-test-env
 #      - name: Build collection for testing
