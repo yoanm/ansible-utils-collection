@@ -95,9 +95,9 @@ jobs:
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
-#      - uses: satackey/action-docker-layer-caching@v0.0.11
+      - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
-#        continue-on-error: true
+        continue-on-error: true
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
@@ -142,9 +142,9 @@ jobs:
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
-#      - uses: satackey/action-docker-layer-caching@v0.0.11
+      - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
-#        continue-on-error: true
+        continue-on-error: true
       - name: Configure test environment
         run: make configure-test-env
       - name: Build collection for testing
@@ -159,10 +159,10 @@ jobs:
       - name: Generate coverage report
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
-#      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
-#      - uses: codecov/codecov-action@v2
-#        with:
-#          fail_ci_if_error: false
+      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
+      - uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false
 ###
 # Integration tests (RECOMMENDED)
 #
