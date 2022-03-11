@@ -88,7 +88,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
       - name: DEBUG
-        run: (ls -ail ~/.local/share/virtualenvs || true) && echo "PIP cache:$(pip cache dir)" && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -97,7 +97,7 @@ jobs:
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
       - name: DEBUG
-        run: (ls -ail ~/.local/share/virtualenvs || true) && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -128,7 +128,7 @@ jobs:
         run: ansible-test sanity --docker -v --color --coverage
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
       - name: DEBUG
-        run: (ls -ail ~/.local/share/virtualenvs || true) && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       # ansible-test support producing code coverage date
       - name: Generate coverage report
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
