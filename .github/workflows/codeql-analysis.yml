@@ -21,7 +21,7 @@ on:
     - cron: '44 8 * * 5'
 
 concurrency:
-  group: ${{ github.ref || github.head_ref }}
+  group: codelql-${{ github.ref || github.head_ref }}
   cancel-in-progress: ${{ github.ref != 'master' }}
 jobs:
   analyze:
