@@ -75,7 +75,7 @@ jobs:
 #          fail_ci_if_error: false
   sanity:
     needs: [python] # Prevent a bunch of jobs to be triggered if python tests fail
-    name: Sanity (Ⓐ ${{ matrix.ansible }})
+    name: Sanity ${{ matrix.ansible }} branch
     strategy:
       fail-fast: false # Keep running other node from the matrix if one failed (errors may be different from node to node)
       matrix:
@@ -139,7 +139,7 @@ jobs:
           fail_ci_if_error: false
   sanity-devel:
     needs: [sanity] # Prevent sanity tests on devel branch if they already fail on stable branches
-    name: Sanity (Ⓐ devel)
+    name: Sanity devel branch
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
