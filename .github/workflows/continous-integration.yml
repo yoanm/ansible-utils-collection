@@ -17,6 +17,7 @@ env:
   PIP_UPGRADE: yes # Always use the newest version of a package even if already there (avoid CI being stuck on cached version forever)
   PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies even if already there  (avoid CI being stuck on cached version forever)
 
+
 concurrency:
   group: ci-${{ github.ref || github.head_ref }}
   cancel-in-progress: ${{ github.ref != 'master' }}
