@@ -18,7 +18,7 @@ env:
   PIP_CACHE_DIR: ~/.cache/pip # Pip data cache
   PIP_UPGRADE: yes # Always use the newest version of a package (avoid CI being stuck on cached version forever)
   PIP_UPGRADE_STRATEGY: eager # Always use the newest version for package dependencies (avoid CI being stuck on cached version forever)
-  PIP_VERBOSE: 2 # DEBUG
+  PIP_VERBOSE: 1 # DEBUG
 
 
 jobs:
