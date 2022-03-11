@@ -88,17 +88,23 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
       - name: DEBUG
-        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail /opt/hostedtoolcache/Python/ || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+          cache: 'pip'
+      - name: Python directory cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
       - name: DEBUG - discover site-package
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check -v
       - name: DEBUG
-        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail /opt/hostedtoolcache/Python/ || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       - name: DEBUG - ENV
         run: env
       # In this step, this action saves a list of existing images,
@@ -131,7 +137,7 @@ jobs:
         run: ansible-test sanity --docker -v --color --coverage
         working-directory: ./build/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
       - name: DEBUG
-        run: echo "A:" && (ls -ail ~/.local/share/virtualenvs || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
+        run: echo "A:" && (ls -ail /opt/hostedtoolcache/Python/ || true) && echo "B:" && (ls -ail ~/.cache/pip || true) && echo "PIP CACHE DIR $(pip cache dir)" && echo "C:" && (ls -ail $(pip cache dir) || true)
       # ansible-test support producing code coverage date
       - name: Generate coverage report
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -151,6 +157,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+          cache: 'pip'
+      - name: Python directory cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-ansible-devel
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
