@@ -13,6 +13,7 @@ env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
 
+
 jobs:
 ###
 # Python tests
@@ -27,12 +28,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           cache: 'pip' # Cache pip install directory
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-          path: dirname $(dirname ${{env.pythonLocation}})
-          key: python_dir-python-tests
+#      - name: Python cache
+#        uses: actions/cache@v2
+#        with:
+#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
+#          path: dirname $(dirname ${{env.pythonLocation}})
+#          key: python_dir-python-tests
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       - name: Configure test environment
@@ -99,12 +100,12 @@ jobs:
         with:
           python-version: 3.8
           cache: 'pip' # Cache pip install directory
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-          path: dirname $(dirname ${{env.pythonLocation}})
-          key: python_dir-ansible-${{ matrix.ansible }}
+#      - name: Python cache
+#        uses: actions/cache@v2
+#        with:
+#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
+#          path: dirname $(dirname ${{env.pythonLocation}})
+#          key: python_dir-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
@@ -156,12 +157,12 @@ jobs:
         with:
           python-version: 3.8
           cache: 'pip' # Cache pip install directory
-      - name: Python cache
-        uses: actions/cache@v2
-        with:
-          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
-          path: dirname $(dirname ${{env.pythonLocation}})
-          key: python_dir-ansible-devel
+#      - name: Python cache
+#        uses: actions/cache@v2
+#        with:
+#          # Go 2 directory up to cache all python versions not only the one installed with "actions/setup-python"
+#          path: dirname $(dirname ${{env.pythonLocation}})
+#          key: python_dir-ansible-devel
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
       # In this step, this action saves a list of existing images,
