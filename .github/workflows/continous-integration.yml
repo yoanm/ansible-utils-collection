@@ -12,7 +12,7 @@ on:
 env:
   NAMESPACE: yoanm
   COLLECTION_NAME: utils
-  CACHE_VERSION: 2022031101 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
   ROOT_PYTHON_VERSION: "3.10"
   ## Pip options
   PIP_CACHE_DIR: ~/.cache/pip # Pip data cache
@@ -43,7 +43,7 @@ jobs:
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{env.LD_LIBRARY_PATH}}
+          path: ${{env.pythonLocation}}
           key: ${{env.CACHE_VERSION}}-python-cache-python
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
@@ -118,7 +118,7 @@ jobs:
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{env.LD_LIBRARY_PATH}}
+          path: ${{env.pythonLocation}}
           key: ${{env.CACHE_VERSION}}-python-cache-ansible-${{ matrix.ansible }}
       - name: Install ansible-core (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
@@ -178,7 +178,7 @@ jobs:
       - name: Python cache
         uses: actions/cache@v2
         with:
-          path: ${{env.LD_LIBRARY_PATH}}
+          path: ${{env.pythonLocation}}
           key: ${{env.CACHE_VERSION}}-python-cache-ansible-devel
       - name: Install ansible-core (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
