@@ -1,0 +1,4 @@
+--
+
+- name: Test simple action
+  simple_action_mock:
