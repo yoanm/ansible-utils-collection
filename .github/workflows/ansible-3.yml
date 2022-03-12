@@ -28,14 +28,15 @@ env:
   CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
-  group: ci-${{ github.ref || github.head_ref }}
+  group: integration-${{ github.ref || github.head_ref }}
   cancel-in-progress: ${{ github.ref != 'master' }}
 jobs:
   integration:
-    runs-on: ubuntu-latest
     name: Integration ${{ matrix.ansible }}+py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
-      max-parallel: 8
+      max-parallel: 6
       fail-fast: ${{ github.ref != 'master' }}
       matrix:
         ansible:
