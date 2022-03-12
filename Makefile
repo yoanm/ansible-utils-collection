@@ -79,7 +79,7 @@ ifneq (,$(findstring --upgrade,$(install_o)))
 	@echo "################################################################################################"
 	# Remove it from install options
 	@echo "BEFORE install_o=$(install_o)"
-	$(eval install_o := $(filter-out --upgrade,$(install_o)))
+	$(eval install_o:=$(install_o:--upgrade=))
 	@echo "AFTER install_o=$(install_o)"
 	rm -Rf ${BUILD_DIR}/*
 endif
