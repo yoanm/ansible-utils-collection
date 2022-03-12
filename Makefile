@@ -89,10 +89,9 @@ install:
 	@echo "# Ansible 2.10 or below detected, using old fashion installation way #"
 	@echo "######################################################################"
 ifeq ($(upgrade),1)
-	@echo "################################################################################################"
-	@echo "# Found --upgrade, not compatible with old fashion install, cleaning directory content instead #"
-	@echo "################################################################################################"
-	rm -Rf ${BUILD_DIR}/*
+	@echo "###################################################################################################"
+	@echo "# Found --upgrade, not compatible with old fashion install. Existing content will be kept as is ! #"
+	@echo "###################################################################################################"
 endif
 	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
 	ansible-galaxy collection install $(install_o) $(source)

@@ -55,6 +55,8 @@ jobs:
 
       # Avoid using galaxy usage if deps are already downloaded one time
       - name: Cache Build directory
+        # Deactivate cache for 2.9 and 2.10 as there is no upgrade mechanism (--upgrade) !
+        if: ${{ matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' }}
         uses: actions/cache@v2
         with:
           path: ${{env.BUILD_DIR}}
