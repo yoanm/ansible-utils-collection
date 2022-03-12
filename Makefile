@@ -54,13 +54,13 @@ configure-test-env: ## 🤖 Install required libraries for test environment (lib
 configure-test-env: target ?=
 configure-test-env: configure-dev-env
 	$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r tests/requirements.txt # Install tests requirements
-ifeq ($(shell if ([ "$(target)" = "units" ] || [ "$(target)" = "" ]) && [ -f tests/unit/requirements.yml ]; then echo 1; else echo 0; fi),1)
+ifeq ($(shell if ([ "$(strip target)" = "units" ] || [ "$(strip target)" = "" ]) && [ -f tests/unit/requirements.yml ]; then echo 1; else echo 0; fi),1)
 	$(MAKE) install install_o="-p ${ANSIBLE_COLLECTIONS_BUILD_DIR} -r tests/unit/requirements.yml" upgrade=1 source=""
 endif
-ifeq ($(shell if ([ "$(target)" = "sanity" ] || [ "$(target)" = "" ]) && [ -f tests/sanity/requirements.yml ]; then echo 1; else echo 0; fi),1)
+ifeq ($(shell if ([ "$(strip target)" = "sanity" ] || [ "$(strip target)" = "" ]) && [ -f tests/sanity/requirements.yml ]; then echo 1; else echo 0; fi),1)
 	$(MAKE) install install_o="-p ${ANSIBLE_COLLECTIONS_BUILD_DIR} -r tests/sanity/requirements.yml" upgrade=1 source=""
 endif
-ifeq ($(shell if ([ "$(target)" = "integration" ] || [ "$(target)" = "" ]) && [ -f tests/integration/requirements.yml ]; then echo 1; else echo 0; fi),1)
+ifeq ($(shell if ([ "$(strip target)" = "integration" ] || [ "$(strip target)" = "" ]) && [ -f tests/integration/requirements.yml ]; then echo 1; else echo 0; fi),1)
 	$(MAKE) install install_o="-p ${ANSIBLE_COLLECTIONS_BUILD_DIR} -r tests/integration/requirements.yml" upgrade=1 source=""
 endif
 
@@ -82,7 +82,7 @@ install: clean
 install: upgrade ?= 0
 install: install_o ?=
 install: source ?= .
-ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
+ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && ([ "$(strip source)" = "" ] || [ "$(strip source)" = "." ]); then echo 1; else echo 0; fi),1)
 install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
 	@echo "######################################################################"
