@@ -82,6 +82,10 @@ install: clean
 install: upgrade ?= 0
 install: install_o ?=
 install: source ?= .
+ifeq ($(ANSIBLE_INSTALL_OLD_FASHION),1)
+# Disable upgrade on runtime
+install: upgrade = 0
+endif
 ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && ([ "$(strip source)" = "" ] || [ "$(strip source)" = "." ]); then echo 1; else echo 0; fi),1)
 install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
@@ -97,6 +101,11 @@ endif
 	ansible-galaxy collection install $(install_o) $(source)
 else
 install:
+ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && [ "$(upgrade)" = "1" ]; then echo 1; else echo 0; fi),1)
+	@echo "###################################################################################################"
+	@echo "# Found --upgrade, not compatible with old fashion install. Existing content will be kept as is ! #"
+	@echo "###################################################################################################"
+endif
 	ansible-galaxy collection install $(install_o)$(if ($(upgrade),1), --upgrade,) $(source)
 endif
 
