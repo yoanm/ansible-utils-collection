@@ -15,6 +15,7 @@ if MYPY:
         ArgSpecOptionalSchema,
         ArgSpecReturn,
         PluginArgSpecReturn,
+        PluginArgSpecReturnRes,
     )
 
 
@@ -49,9 +50,15 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     return valid, errors, updated_params
 
 
-def check_plugin_argspec(plugin_name, plugin_args, schema, schema_format="doc", schema_conditionals=None,
-                         other_args=None):
-    # type: (Text, Dict, ArgSpecSchema, Text, ArgSpecOptionalSchema, ArgSpecOptionalSchema) -> PluginArgSpecReturn
+def check_plugin_argspec(
+    plugin_name,  # type: Text
+    plugin_args,  # type: Dict
+    schema,  # type: ArgSpecSchema
+    schema_format="doc",  # type:  Text
+    schema_conditionals=None,  # type: ArgSpecOptionalSchema
+    other_args=None  # type: ArgSpecOptionalSchema
+):
+    # type: (...) -> PluginArgSpecReturn
     """
     Same as the original C(check_argspec) but with typehint (and removal of useless 'valid' property)
     +add 'other_args' param
@@ -67,14 +74,10 @@ def check_plugin_argspec(plugin_name, plugin_args, schema, schema_format="doc", 
         other_args=other_args
     )
     # Ensure default values
-    check_res = {'errors': [], 'failed': (not valid)}
+    check_res = dict(errors=[], failed=(not valid), msg=None)  # type: PluginArgSpecReturnRes
+    # Always return a list of error string
     if not valid:
         check_res["errors"] = errors if isinstance(errors, list) else [errors]
         check_res["msg"] = "Errors during argspec validation for %s plugin" % plugin_name
-
-    # Always return a list of error string
-    if not valid:
-        if 'errors' in check_res and check_res['errors'] is not None and not isinstance(check_res['errors'], list):
-            check_res['errors'] = [check_res['errors']]
 
     return check_res, updated_params
