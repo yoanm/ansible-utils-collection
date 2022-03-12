@@ -62,25 +62,22 @@ build: clean
 .PHONY: install
 install: ## ✍️  Install to a directory (to use the collection inside a playbook for instance)
 #### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
+#### Use upgrade=1 instead of install_o="--upgrade" to keep compatibility with ansible below 2.10
 install: clean
-install: install_o?=
+install: upgrade ?= 0
+install: install_o ?=
 ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
 # ansible-core below v2.11 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
 # Install from tar.gz instead
 install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
-	$(eval install_o ?=)
 	@echo "######################################################################"
 	@echo "# Ansible 2.10 or below detected, using old fashion installation way #"
 	@echo "######################################################################"
-ifneq (,$(findstring --upgrade,$(install_o)))
+ifeq ($(upgrade),1)
 	@echo "################################################################################################"
 	@echo "# Found --upgrade, not compatible with old fashion install, cleaning directory content instead #"
 	@echo "################################################################################################"
-	# Remove it from install options
-	@echo "BEFORE install_o=$(install_o)"
-	$(eval install_o:=$(install_o:--upgrade=))
-	@echo "AFTER install_o=$(install_o)"
 	rm -Rf ${BUILD_DIR}/*
 endif
 	@echo "FINAL1 install_o=$(install_o)"
@@ -89,8 +86,7 @@ endif
 	ansible-galaxy collection install $(install_o) $(source)
 else
 install:
-	$(eval install_o ?=)
-	ansible-galaxy collection install $(install_o) .
+	ansible-galaxy collection install $(install_o)$(if ($(upgrade),1), --upgrade,) .
 endif
 
 .PHONY: deploy
@@ -101,7 +97,7 @@ deploy: ## 🚀 Deploy to ansible galaxy
 build-for-test: ## 🧪️ Build to the temporary build directory for test usage
 build-for-test:
 	rm -rf ${COLLECTION_BUILD_DIR} # Remove only the collection directory (dependencies will be kept there if previously installed)
-	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR} --upgrade" # Use --upgrade to always run on latest versions
+	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR}" upgrade=1 # Use upgrade=1 to always run on latest versions
 	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 ##—————————— \_ 🐍 Python —————————————————————————————————————————————————
