@@ -131,7 +131,7 @@ jobs:
 
       # ansible-test support producing code coverage
       - name: Run integration tests
-        run: make test-ansible-integration integration_o="-v --color --retry-on-error --continue-on-error --diff --python ${{ matrix.python }} --docker --coverage"
+        run: make test-ansible-integration integration_o="-v --requirements --color --retry-on-error --continue-on-error --diff --python ${{ matrix.python }} --docker --coverage"
 
       - name: Generate coverage report
         run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"

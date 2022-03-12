@@ -60,7 +60,7 @@ jobs:
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
       - name: Run sanity tests
-        run: make test-ansible-sanity sanity_o="--docker --color --coverage"
+        run: make test-ansible-sanity sanity_o="--docker --color --coverage --requirements"
 
       # ansible-test support producing code coverage
       - name: Generate coverage report

@@ -61,7 +61,7 @@ jobs:
         run: make test-python
 
       - name: Run sanity tests
-        run: make test-ansible-units units_o="-v --color --docker --coverage"
+        run: make test-ansible-units units_o="-v --color --docker --coverage --requirements"
 
       # ansible-test support producing code coverage
       - name: Generate coverage report
