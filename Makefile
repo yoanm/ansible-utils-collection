@@ -24,12 +24,12 @@ COLLECTION_BUILD_DIR=${ANSIBLE_COLLECTIONS_BUILD_DIR}/${COLLECTION_NAMESPACE}/${
 
 default: clean configure-dev-env
 
-## —— 📚 Help ——————————————————————————————————————————————————————————————
+##—— 📚 Help ——————————————————————————————————————————————————————————————
 .PHONY: help
 help: ## ❓ Dislay this help
-	@grep -E '(^[a-zA-Z0-9_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
+	@grep -E '(^[a-zA-Z0-9_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 'N; s/\[32m##——————————/[33m           /;'  | sed -e 'N; s/\[32m##——/[33m ——/;' | sed -e 'N; s/\[32m####/[34m                                 /;'  | sed -e 'N; s/\[32m###/[36m                                 /;' | sed -e 'N; s/\[32m##/[33m/;'
 
-## —— ️⚙️  Environments ——————————————————————————————————————————————————————
+##—— ️⚙️  Environments ——————————————————————————————————————————————————————
 .PHONY: clean
 clean: ## 🧹 Clean generated contents
 clean:
@@ -45,36 +45,39 @@ configure-test-env: ## 🤖 Install required libraries for test environment (lib
 configure-test-env: configure-dev-env
 	$(PYTHON) -m pip install -r tests/requirements.txt # Install tests requirements
 
-## —— 🇦 Ansible collection —————————————————————————————————————————————————
-##               \_ 🛰️  Galaxy ——————————————————————————————————————————————
+##—— 🇦 Ansible collection —————————————————————————————————————————————————
+##—————————— \_ 🛰️  Galaxy —————————————————————————————————————————————————
 .PHONY: build
 build: ## 🗜️  Build for galaxy deployment (creates a tar.gz file)
-##                                  Use build_o="..." to specify build options (--force, --output-path PATH, --token TOKEN, etc)
+#### Use build_o="..." to specify build options (--force, --output-path PATH, --token TOKEN, etc)
 build: clean
 	@$(eval build_o ?=)
 	ansible-galaxy collection build $(build_o) .
 
 .PHONY: install
 install: ## ✍️  Install to a directory (to use the collection inside a playbook for instance)
-##                                  Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
+#### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
 install: clean
 ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
 # ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
 # Install from tar.gz instead
-install: build_o=--output-path ${BUILD_DIR} --force
-install: build
-install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
+install:
+	@echo "######################################################################"
+	@echo "# Ansible 2.10 or below detected, using old fashion installation way #"
+	@echo "######################################################################"
+	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
+	@$(eval install_o ?=)
+	ansible-galaxy collection install $(install_o) ${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 else
-install: source=.
-endif
 install:
 	@$(eval install_o ?=)
-	ansible-galaxy collection install $(install_o) $(source)
+	ansible-galaxy collection install $(install_o) .
+endif
 
 .PHONY: deploy
 deploy: ## 🚀 Deploy to ansible galaxy
 	@echo "TODO"
-##               \_ 🧪️ Tests ———————————————————————————————————————————————
+##—————————— \_ 🧪️ Tests ——————————————————————————————————————————————————
 .PHONY: build-for-test
 build-for-test: ## 🧪️ Build to the temporary build directory for test usage
 build-for-test:
@@ -82,7 +85,7 @@ build-for-test:
 	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR}"
 	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
-##               \_ 🐍 Python ——————————————————————————————————————————————
+##—————————— \_ 🐍 Python —————————————————————————————————————————————————
 .PHONY: install-as-python-pkg
 install-as-python-pkg: ## 🔗 Build the collection and mount content as python package to current python environment
 install-as-python-pkg: build_dir=${BUILD_DIR}/python-pkg
@@ -99,12 +102,12 @@ uninstall-python-pkg:
 	$(MAKE) clean
 
 
-## —— 🧪️ Tests —————————————————————————————————————————————————————————————
+##—— 🧪️ Tests —————————————————————————————————————————————————————————————
 .PHONY: test
 test: ## 🏃 Launch all tests
 test: test-python test-ansible
 
-##               \_ 🐍 Python ——————————————————————————————————————————————
+##—————————— \_ 🐍 Python —————————————————————————————————————————————————
 .PHONY: test-python
 test-python: ## 🏃 Launch python-related tests (typehint, lint, etc)
 test-python: test-mypy
@@ -113,43 +116,61 @@ test-python: test-mypy
 test-mypy: ## 🏃 Launch MyPy checks
 test-mypy:
 	$(PYTHON) -m mypy --config-file mypy.ini .
+	$(PYTHON) -m mypy --config-file tests/mypy.ini tests
 
-##               \_ 🇦 Ansible tests ————————————————————————————————————————
-##                                  Trigger ansible-related tests upon built collection
+##—————————— \_ 🇦 Ansible tests ———————————————————————————————————————————
+### Trigger ansible-related tests upon built collection
 .PHONY: test-ansible
 test-ansible: ## 🏃 Launch ansible-related tests (unit, integration and sanity tests)
-test-ansible: build-for-test test-ansible-sanity
+test-ansible: build-for-test test-ansible-units test-ansible-sanity test-ansible-integration
 
 .PHONY: test-ansible-units
 test-ansible-units: ## 🏃 Launch ansible unit tests
-##                                  Use unit_o="..." to specify options (--color, --docker, --coverage, etc)
-test-ansible-units: unit_o?=--color
+### Deactivated if "tests/unit" directory doesn't exist!
+#### Use units_o="..." to specify options (--color, --docker, --coverage, etc)
+ifneq ($(wildcard ${COLLECTION_BUILD_DIR}/tests/unit/.*),) # Execute tests only if there is the required directory !
+test-ansible-units: units_o?=-v --color --requirements
 test-ansible-units:
-	@$(eval unit_o ?=)
-	@echo "TODO"
+	@$(eval units_o ?=)
+	cd ${COLLECTION_BUILD_DIR} && ansible-test units $(units_o)
+else
+test-ansible-units:
+	@echo "DEBUG ${COLLECTION_BUILD_DIR}/tests/unit => $(wildcard ${COLLECTION_BUILD_DIR}/tests/unit/.*)"
+	@echo "###########################################################################"
+	@echo "# Unit test directory is missing, create \"tests/unit\" directory first ! #"
+	@echo "###########################################################################"
+endif
 
 .PHONY: test-ansible-integration
 test-ansible-integration: ## 🏃 Launch ansible integration tests
-##                                  Use integration_o="..." to specify options (--retry-on-error, --python VERSION, --docker, --coverage, etc)
-test-ansible-integration: integration_o?=--color
+### Deactivated if "tests/integration/targets" directory doesn't exist!
+#### Use integration_o="..." to specify options (--retry-on-error, --python VERSION, --docker, --coverage, etc)
+ifneq ($(wildcard ${COLLECTION_BUILD_DIR}/tests/integration/targets/),) # Execute tests only if there is the required directory !
+test-ansible-integration: integration_o?=-v --color --requirements
 test-ansible-integration:
 	@$(eval integration_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test integration $(integration_o)
+else
+test-ansible-integration:
+	@echo "##################################################################################################"
+	@echo "# Integration tests directory is missing, create \"tests/integration/targets\" directory first ! #"
+	@echo "##################################################################################################"
+endif
 
 .PHONY: test-ansible-sanity
 test-ansible-sanity: ## 🏃 Launch ansible sanity checks.
-##                                  Use sanity_o="..." to specify options (--test TEST_NAME, --docker, --coverage, etc)
-test-ansible-sanity: sanity_o?=--color
+#### Use sanity_o="..." to specify options (--test TEST_NAME, --docker, --coverage, etc)
+test-ansible-sanity: sanity_o?=-v --color --requirements
 test-ansible-sanity:
 	@$(eval sanity_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test sanity $(sanity_o)
 
 .PHONY: test-ansible-coverage
 test-ansible-coverage: ## 🏃 Launch ansible coverage generation (xml by default)
-##                                  Use coverage_o="..." to specify options (--requirements, --group-by GROUP, etc)
-##                                  Use coverage_c="..." to specify coverage command (report, html, combine, etc)
+#### Use coverage_o="..." to specify options (--requirements, --group-by GROUP, etc)
+#### Use coverage_c="..." to specify coverage command (report, html, combine, etc)
 test-ansible-coverage: coverage_c?=xml
-test-ansible-coverage: coverage_o?=--color
+test-ansible-coverage: coverage_o?=-v --color --requirements
 test-ansible-coverage:
 	@$(eval coverage_o ?=)
-	cd ${COLLECTION_BUILD_DIR} && ansible-test coverage $(coverage_c) $(coverage_o)
+	cd ${COLLECTION_BUILD_DIR} && ansible-test coverage $(coverage_c) $(coverage_o); \

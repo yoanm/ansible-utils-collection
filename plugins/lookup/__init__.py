@@ -9,16 +9,16 @@ from ansible.errors import AnsibleLookupError
 from ansible.parsing.dataloader import DataLoader
 from ansible.plugins.lookup import LookupBase as AnsibleLookupBase
 from ansible.template import Templar
+from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_validate import check_argspec
 
-from ..plugin_utils.args_validation import ValidateArgsResult, validate_args, \
-    ValidateArgsSchema
 from ..plugin_utils.execute_plugins import execute_lookup
-from ..plugin_utils.path import append_collection_path_to_ansible_search_path
 
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
     from typing import Text, Optional, Dict, Any, List, Tuple, Type
+    from ..plugin_utils.args_validation import ArgSpecSchema, ArgSpecOptionalSchema, PluginArgSpecReturn, ArgSpecSchema, \
+        check_plugin_argspec
 
 
 class LookupBase(AnsibleLookupBase):
@@ -32,13 +32,22 @@ class LookupBase(AnsibleLookupBase):
         Method will be safely executed by C(LookupBase::run)
         """
 
-    def _check_varspec(self, variables, schema, schema_format='doc'):
-        # type: (LookupBase, Dict, ValidateArgsSchema, Text) -> ValidateArgsResult
-        return validate_args(
-            caller="Lookup %s" % self.__class__,
-            args=variables,
-            schema=schema,
-            schema_format=schema_format
+    def check_argspec(
+        self,  # type: LookupBase
+        args,  # type: Dict
+        schema,  # type: ArgSpecSchema
+        schema_format='doc',  # type: Text
+        schema_conditionals=None,  # type: ArgSpecOptionalSchema
+        other_args=None  # type: ArgSpecOptionalSchema
+    ):
+        # type: (...) -> PluginArgSpecReturn
+        return check_plugin_argspec(
+            self._task.get_name("Lookup %s" % self.__class__),
+            args,
+            schema,
+            schema_format,
+            schema_conditionals,
+            other_args
         )
 
     @classmethod
@@ -46,16 +55,17 @@ class LookupBase(AnsibleLookupBase):
         # type: (Type[LookupBase], List) -> Text
         return 'Errors during variables validation => \n- %s' % "\n- ".join(errors)
 
-    def __validate_variables(self, variables):
+    def __validate_vars(self, variables):
         # type: (LookupBase, Dict) -> Tuple[bool, Optional[Text], Dict]
         vars_spec = getattr(self, "VARIABLES_SPEC", None)
         if vars_spec is not None:
             self._display.display('vars_spec=%s' % vars_spec)
-            valid, errors, valid_vars = self._check_varspec(variables=variables,
-                                                            schema=dict(argument_spec=vars_spec),
-                                                            schema_format='argspec')
+            check_res, valid_vars = self._check_varspec(args=variables,
+                                                        schema=dict(argument_spec=vars_spec),
+                                                        schema_format='argspec')
+            valid = not check_res['failed']
 
-            return valid, None if valid else self._format_vars_spec_validation_errors(errors), valid_vars
+            return valid, None if valid else check_res['errors'], valid_vars
 
         return True, None, variables
 
@@ -72,7 +82,7 @@ class LookupBase(AnsibleLookupBase):
             variables = dict()
 
         # Validated vars specification
-        valid, error, valid_vars = self.__validate_variables(variables)
+        valid, error, valid_vars = self.__validate_vars(variables)
 
         # Early return in case there is already a failure
         if not valid:
