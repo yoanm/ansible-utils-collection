@@ -1,2 +1,1 @@
-ansible-core>=2.10
 mypy[python2]>=0.940,<1.0.0

@@ -87,8 +87,8 @@ deploy: ## 🚀 Deploy to ansible galaxy
 .PHONY: build-for-test
 build-for-test: ## 🧪️ Build to the temporary build directory for test usage
 build-for-test:
-	rm -rf ${COLLECTION_BUILD_DIR} # Remove only this collection directory (dependencies will be kept there if previously installed)
-	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR}"
+	rm -rf ${COLLECTION_BUILD_DIR} # Remove only the collection directory (dependencies will be kept there if previously installed)
+	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR} --upgrade"
 	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 ##—————————— \_ 🐍 Python —————————————————————————————————————————————————
