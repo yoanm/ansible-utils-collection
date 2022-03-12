@@ -50,24 +50,24 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
         with:
-          key: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-{hash}
-          restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-
+          key: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ matrix.ansible }}-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ matrix.ansible }}-
 
-      # Avoid using galaxy if deps are already downloaded one time
+      # Avoid using galaxy usage if deps are already downloaded one time
       - name: Cache Build directory
         uses: actions/cache@v2
         with:
           path: ${{env.BUILD_DIR}}
-          key: ${{env.CACHE_VERSION}}-build_dir-cache-ansible-${{ matrix.ansible }}
+          key: ${{env.CACHE_VERSION}}-unit-tests-build_dir-cache-ansible-${{ matrix.ansible }}
 
       - name: Configure test environment
-        run: make configure-test-env && make build-for-test
+        run: make configure-test-env mode="units" && make build-for-test
 
       - name: Execute python tests
         if: ${{ matrix.ansible == 'devel' }}
         run: make test-python
 
-      - name: Run sanity tests
+      - name: Run unit tests
         run: make test-ansible-units units_o="-v --color --docker --coverage --requirements"
 
       # ansible-test support producing code coverage

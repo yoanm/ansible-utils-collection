@@ -50,8 +50,19 @@ configure-dev-env:
 
 .PHONY: configure-test-env
 configure-test-env: ## 🤖 Install required libraries for test environment (libs used on codebase, MyPy, etc)
+#### Use target="..." to restrict extra galaxy requirements installation to specific target (units, integration, sanity)
+configure-test-env: target ?=
 configure-test-env: configure-dev-env
 	$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r tests/requirements.txt # Install tests requirements
+ifeq ($(shell if ([ "$(target)" = "units" ] || [ "$(target)" = "" ]) && [ -f tests/unit/requirements.yml ]; then echo 1; else echo 0; fi),1)
+	$(MAKE) install install_o="-r tests/unit/requirements.yml" upgrade=1 source=""
+endif
+ifeq ($(shell if ([ "$(target)" = "sanity" ] || [ "$(target)" = "" ]) && [ -f tests/sanity/requirements.yml ]; then echo 1; else echo 0; fi),1)
+	$(MAKE) install install_o="-r tests/sanity/requirements.yml" upgrade=1 source=""
+endif
+ifeq ($(shell if ([ "$(target)" = "integration" ] || [ "$(target)" = "" ]) && [ -f tests/integration/requirements.yml ]; then echo 1; else echo 0; fi),1)
+	$(MAKE) install install_o="-r tests/integration/requirements.yml" upgrade=1 source=""
+endif
 
 ##—— 🇦 Ansible collection —————————————————————————————————————————————————
 ##—————————— \_ 🛰️  Galaxy —————————————————————————————————————————————————
@@ -66,9 +77,11 @@ build: clean
 install: ## ✍️  Install to a directory (to use the collection inside a playbook for instance)
 #### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
 #### Use upgrade=1 instead of install_o="--upgrade" to keep compatibility with ansible below 2.10
+#### Use source="..." to specify the source
 install: clean
 install: upgrade ?= 0
 install: install_o ?=
+install: source ?= .
 ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
 install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
@@ -81,13 +94,11 @@ ifeq ($(upgrade),1)
 	@echo "################################################################################################"
 	rm -Rf ${BUILD_DIR}/*
 endif
-	@echo "FINAL1 install_o=$(install_o)"
 	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
-	@echo "FINAL2 install_o=$(install_o)"
 	ansible-galaxy collection install $(install_o) $(source)
 else
 install:
-	ansible-galaxy collection install $(install_o)$(if ($(upgrade),1), --upgrade,) .
+	ansible-galaxy collection install $(install_o)$(if ($(upgrade),1), --upgrade,) $(source)
 endif
 
 .PHONY: deploy
@@ -96,9 +107,11 @@ deploy: ## 🚀 Deploy to ansible galaxy
 ##—————————— \_ 🧪️ Tests ——————————————————————————————————————————————————
 .PHONY: build-for-test
 build-for-test: ## 🧪️ Build to the temporary build directory for test usage
+#### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
+build-for-test: install_o ?=
 build-for-test:
 	rm -rf ${COLLECTION_BUILD_DIR} # Remove only the collection directory (dependencies will be kept there if previously installed)
-	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR}" upgrade=1 # Use upgrade=1 to always run on latest versions
+	$(MAKE) install install_o="$(install_o) --force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR}" upgrade=1 # Use upgrade=1 to always run on latest versions
 	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 ##—————————— \_ 🐍 Python —————————————————————————————————————————————————
@@ -145,9 +158,8 @@ test-ansible-units: ## 🏃 Launch ansible unit tests
 ### Deactivated if "tests/unit" directory doesn't exist!
 #### Use units_o="..." to specify options (--color, --docker, --coverage, etc)
 ifneq ($(wildcard ${COLLECTION_BUILD_DIR}/tests/unit/.*),) # Execute tests only if there is the required directory !
-test-ansible-units: units_o?=-v --color --requirements
+test-ansible-units: units_o ?= -v --color --requirements
 test-ansible-units:
-	@$(eval units_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test units $(units_o)
 else
 test-ansible-units:
@@ -162,9 +174,8 @@ test-ansible-integration: ## 🏃 Launch ansible integration tests
 ### Deactivated if "tests/integration/targets" directory doesn't exist!
 #### Use integration_o="..." to specify options (--retry-on-error, --python VERSION, --docker, --coverage, etc)
 ifneq ($(wildcard ${COLLECTION_BUILD_DIR}/tests/integration/targets/),) # Execute tests only if there is the required directory !
-test-ansible-integration: integration_o?=-v --color --requirements
+test-ansible-integration: integration_o ?= -v --color --requirements
 test-ansible-integration:
-	@$(eval integration_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test integration $(integration_o)
 else
 test-ansible-integration:
@@ -176,17 +187,15 @@ endif
 .PHONY: test-ansible-sanity
 test-ansible-sanity: ## 🏃 Launch ansible sanity checks.
 #### Use sanity_o="..." to specify options (--test TEST_NAME, --docker, --coverage, etc)
-test-ansible-sanity: sanity_o?=-v --color --requirements
+test-ansible-sanity: sanity_o ?= -v --color --requirements
 test-ansible-sanity:
-	@$(eval sanity_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test sanity $(sanity_o)
 
 .PHONY: test-ansible-coverage
 test-ansible-coverage: ## 🏃 Launch ansible coverage generation (xml by default)
 #### Use coverage_o="..." to specify options (--requirements, --group-by GROUP, etc)
 #### Use coverage_c="..." to specify coverage command (report, html, combine, etc)
-test-ansible-coverage: coverage_c?=xml
-test-ansible-coverage: coverage_o?=-v --color --requirements
+test-ansible-coverage: coverage_c ?= xml
+test-ansible-coverage: coverage_o ?= -v --color --requirements
 test-ansible-coverage:
-	@$(eval coverage_o ?=)
 	cd ${COLLECTION_BUILD_DIR} && ansible-test coverage $(coverage_c) $(coverage_o); \
