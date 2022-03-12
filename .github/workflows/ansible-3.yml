@@ -27,7 +27,7 @@ on: repository_dispatch # Just to keep it but without automatic run
 #    - cron: '0 10 26 * *'
 env:
   BUILD_DIR: '~/build'
-  CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031301 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
