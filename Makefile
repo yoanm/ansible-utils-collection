@@ -16,7 +16,7 @@ ANSIBLE_INSTALL_OLD_FASHION=1
 endif
 
 
-BUILD_DIR=build
+BUILD_DIR?=build
 ANSIBLE_COLLECTIONS_BUILD_DIR=${BUILD_DIR}/ansible_collections
 COLLECTION_BUILD_DIR=${ANSIBLE_COLLECTIONS_BUILD_DIR}/${COLLECTION_NAMESPACE}/${COLLECTION_NAME}
 
@@ -39,7 +39,7 @@ help: ## ❓ Dislay this help
 .PHONY: clean
 clean: ## 🧹 Clean generated contents
 clean:
-	rm -rf ${BUILD_DIR}/* tests/output .mypy_cache ${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-*.tar.gz
+	rm -rf build/* tests/output .mypy_cache ${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-*.tar.gz
 
 .PHONY: configure-dev-env
 configure-dev-env: ## 🤖 Install required libraries for dev environment (python libs used on codebase)

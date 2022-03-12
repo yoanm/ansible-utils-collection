@@ -7,7 +7,7 @@
 # multiple versions see the following for an example:
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 name: Integration
-on: workflow_dispatch # Just to keep it but without automatic run
+on: repository_dispatch # Just to keep it but without automatic run
 #on:
 #  push:
 #    branches: [master]
@@ -26,6 +26,7 @@ on: workflow_dispatch # Just to keep it but without automatic run
 #  schedule:
 #    - cron: '0 10 26 * *'
 env:
+  BUILD_DIR: '~/build'
   CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
