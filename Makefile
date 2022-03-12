@@ -78,10 +78,14 @@ ifneq (,$(findstring --upgrade,$(install_o)))
 	@echo "# Found --upgrade, not compatible with old fashion install, cleaning directory content instead #"
 	@echo "################################################################################################"
 	# Remove it from install options
+	@echo "BEFORE install_o=$(install_o)"
 	$(eval install_o := $(filter-out --upgrade,$(install_o)))
+	@echo "AFTER install_o=$(install_o)"
 	rm -Rf ${BUILD_DIR}/*
 endif
+	@echo "FINAL1 install_o=$(install_o)"
 	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
+	@echo "FINAL2 install_o=$(install_o)"
 	ansible-galaxy collection install $(install_o) $(source)
 else
 install:
@@ -97,7 +101,7 @@ deploy: ## 🚀 Deploy to ansible galaxy
 build-for-test: ## 🧪️ Build to the temporary build directory for test usage
 build-for-test:
 	rm -rf ${COLLECTION_BUILD_DIR} # Remove only the collection directory (dependencies will be kept there if previously installed)
-	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR} --upgrade"
+	$(MAKE) install install_o="--force -p ${ANSIBLE_COLLECTIONS_BUILD_DIR} --upgrade" # Use --upgrade to always run on latest versions
 	cd ${COLLECTION_BUILD_DIR} && git init -q . # Workaround when test folder is under a gitignored folder (else ansible-test does nothing)
 
 ##—————————— \_ 🐍 Python —————————————————————————————————————————————————
