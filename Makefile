@@ -44,12 +44,12 @@ clean:
 .PHONY: configure-dev-env
 configure-dev-env: ## 🤖 Install required libraries for dev environment (python libs used on codebase)
 configure-dev-env:
-	$(PYTHON) -m pip install -r meta/ee-requirements.txt # Install internal requirements
+	$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r meta/ee-requirements.txt # Install internal requirements
 
 .PHONY: configure-test-env
 configure-test-env: ## 🤖 Install required libraries for test environment (libs used on codebase, MyPy, etc)
 configure-test-env: configure-dev-env
-	$(PYTHON) -m pip install -r tests/requirements.txt # Install tests requirements
+	$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r tests/requirements.txt # Install tests requirements
 
 ##—— 🇦 Ansible collection —————————————————————————————————————————————————
 ##—————————— \_ 🛰️  Galaxy —————————————————————————————————————————————————

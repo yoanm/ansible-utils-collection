@@ -77,7 +77,7 @@ def check_plugin_argspec(
     check_res = dict(errors=[], failed=(not valid), msg=None)  # type: PluginArgSpecReturnRes
     # Always return a list of error string
     if not valid:
-        check_res["errors"] = errors if isinstance(errors, list) else [errors]
+        check_res["errors"] = errors
         check_res["msg"] = "Errors during argspec validation for %s plugin" % plugin_name
 
     return check_res, updated_params
