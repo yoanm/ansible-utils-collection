@@ -2,7 +2,7 @@
 # Sanity tests (REQUIRED)
 #
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
-name: Sanity
+name: Unit tests
 on:
   # Run CI against all pushes (direct commits, also merged PRs), Pull Requests
   push:
@@ -21,7 +21,7 @@ jobs:
   sanity:
     name: Sanity ${{ matrix.ansible }}
     strategy:
-      fail-fast: ${{ github.ref != 'master' }}
+      fail-fast: true
       matrix:
         ansible:
 #          # - stable-2.9 # Only if your collection supports Ansible 2.9
@@ -54,11 +54,12 @@ jobs:
       - name: Configure test environment
         run: make configure-test-env && make build-for-test
 
-      # run ansible-test sanity inside of Docker.
-      # The docker container has all the pinned dependencies that are required
-      # and all python versions ansible supports.
+      - name: Execute python tests
+        if: ${{ matrix.ansible == 'devel' }}
+        run: make test-python
+
       - name: Run sanity tests
-        run: make test-ansible-sanity sanity_o="--docker --color --coverage"
+        run: make test-ansible-units units_o="-v --color --docker --coverage"
 
       # ansible-test support producing code coverage
       - name: Generate coverage report
