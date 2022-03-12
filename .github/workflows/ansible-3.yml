@@ -1,12 +1,12 @@
-####
-## Integration tests (RECOMMENDED)
-##
-## https://docs.ansible.com/ansible/latest/dev_guide/testing_integration.html
-##
-## If the application you are testing is available as a docker container and you want to test
-## multiple versions see the following for an example:
-## https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
-#name: Integration
+###
+# Integration tests (RECOMMENDED)
+#
+# https://docs.ansible.com/ansible/latest/dev_guide/testing_integration.html
+#
+# If the application you are testing is available as a docker container and you want to test
+# multiple versions see the following for an example:
+# https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
+name: Integration
 #on:
 #  push:
 #    branches: [master]
@@ -28,7 +28,7 @@
 #  CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
 #
 #concurrency:
-#  group: ci-${{ github.ref || github.head_ref }}
+#  group: ansible-integration-tests-${{ github.ref || github.head_ref }}
 #  cancel-in-progress: ${{ github.ref != 'master' }}
 #jobs:
 #  integration:

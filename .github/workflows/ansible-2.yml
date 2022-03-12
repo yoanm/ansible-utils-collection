@@ -6,8 +6,7 @@ name: Sanity
 on:
   # Run CI against all pushes to main branch (direct commits, also merged PRs) and Pull Requests
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
@@ -17,7 +16,7 @@ env:
   CACHE_VERSION: 2022031102 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
-  group: ci-${{ github.ref || github.head_ref }}
+  group: ansible-sanity-tests-${{ github.ref || github.head_ref }}
   cancel-in-progress: ${{ github.ref != 'master' }}
 jobs:
   sanity:
