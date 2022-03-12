@@ -74,7 +74,7 @@ jobs:
       fail-fast: ${{ github.ref != 'master' }}
       matrix:
         ansible:
-          - stable-2.9
+#          # - stable-2.9 # Only if your collection supports Ansible 2.9
           - stable-2.10
           - stable-2.11
           - stable-2.12
@@ -141,7 +141,7 @@ jobs:
       fail-fast: ${{ github.ref != 'master' }}
       matrix:
         ansible:
-          - stable-2.9
+#          # - stable-2.9 # Only if your collection supports Ansible 2.9
           - stable-2.10
           - stable-2.11
           - stable-2.12
