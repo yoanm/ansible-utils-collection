@@ -22,7 +22,7 @@ jobs:
   sanity:
     name: Sanity ${{ matrix.ansible }}
     strategy:
-      fail-fast: ${{ github.ref != 'master' }}
+      fail-fast: false
       matrix:
         ansible:
 #          # - stable-2.9 # Only if your collection supports Ansible 2.9
