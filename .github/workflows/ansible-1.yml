@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'master' }}
 jobs:
   sanity:
-    name: Sanity ${{ matrix.ansible }}
+    name: Unit ${{ matrix.ansible }}
     strategy:
       fail-fast: true
       matrix:
