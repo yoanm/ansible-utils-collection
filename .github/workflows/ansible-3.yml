@@ -126,6 +126,13 @@ jobs:
           key: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-${{ matrix.python }}-{hash}
           restore-keys: ${{env.CACHE_VERSION}}-docker-cache-ansible-${{ matrix.ansible }}-${{ matrix.python }}-
 
+      # Avoid using galaxy if deps are already downloaded one time
+      - name: Cache Build directory
+        uses: actions/cache@v2
+        with:
+          path: ${{env.BUILD_DIR}}
+          key: ${{env.CACHE_VERSION}}-build_dir-cache-ansible-${{ matrix.ansible }}
+
       - name: Configure test environment
         run: make configure-test-env && make build-for-test
 
