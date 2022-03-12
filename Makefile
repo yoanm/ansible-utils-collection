@@ -6,13 +6,16 @@ PYTHON?=python
 COLLECTION_NAMESPACE?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["namespace"])')
 COLLECTION_NAME?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["name"])')
 COLLECTION_VERSION?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["version"])')
+
 ANSIBLE_VERSION=$(shell $(PYTHON) -c 'from ansible import __version__ ;print("%s" % ".".join( __version__.split(".")[:2]));')
-ANSIBLE_INSTALL_OLD_FASHION=0
+# ansible-core below v2.11 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
+# Install from tar.gz instead
 ifeq ($(ANSIBLE_VERSION), 2.9)
 ANSIBLE_INSTALL_OLD_FASHION=1
-endif
-ifeq ($(ANSIBLE_VERSION), 2.10)
+else ifeq ($(ANSIBLE_VERSION), 2.10)
 ANSIBLE_INSTALL_OLD_FASHION=1
+else
+ANSIBLE_INSTALL_OLD_FASHION=0
 endif
 
 BUILD_DIR?=build
@@ -67,8 +70,6 @@ install: clean
 install: upgrade ?= 0
 install: install_o ?=
 ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
-# ansible-core below v2.11 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
-# Install from tar.gz instead
 install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
 	@echo "######################################################################"

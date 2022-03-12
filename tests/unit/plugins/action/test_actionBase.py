@@ -13,7 +13,6 @@ from ansible.template import Templar
 from ansible_collections.community.internal_test_tools.tests.unit.compat import unittest
 from ansible_collections.community.internal_test_tools.tests.unit.compat.mock import MagicMock
 from ansible_collections.community.internal_test_tools.tests.unit.mock.loader import DictDataLoader
-
 from ansible_collections.yoanm.utils.plugins.action import ActionBase
 
 
