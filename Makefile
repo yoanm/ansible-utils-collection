@@ -6,7 +6,7 @@ PYTHON?=python
 COLLECTION_NAMESPACE?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["namespace"])')
 COLLECTION_NAME?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["name"])')
 COLLECTION_VERSION?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["version"])')
-ANSIBLE_VERSION=$(shell $(PYTHON) -c 'from ansible.release import __version__ ;print("%s" % ".".join( __version__.split(".")[:2]));')
+ANSIBLE_VERSION=$(shell $(PYTHON) -c 'from ansible import __version__ ;print("%s" % ".".join( __version__.split(".")[:2]));')
 ANSIBLE_INSTALL_OLD_FASHION=0
 ifeq ($(ANSIBLE_VERSION), 2.9)
 ANSIBLE_INSTALL_OLD_FASHION=1
@@ -14,7 +14,6 @@ endif
 ifeq ($(ANSIBLE_VERSION), 2.10)
 ANSIBLE_INSTALL_OLD_FASHION=1
 endif
-
 
 BUILD_DIR?=build
 ANSIBLE_COLLECTIONS_BUILD_DIR=${BUILD_DIR}/ansible_collections
@@ -64,19 +63,29 @@ build: clean
 install: ## ✍️  Install to a directory (to use the collection inside a playbook for instance)
 #### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
 install: clean
+install: install_o?=
 ifeq ($(ANSIBLE_INSTALL_OLD_FASHION), 1)
-# ansible-core v2.10 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
+# ansible-core below v2.11 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
 # Install from tar.gz instead
+install: source=${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 install:
+	$(eval install_o ?=)
 	@echo "######################################################################"
 	@echo "# Ansible 2.10 or below detected, using old fashion installation way #"
 	@echo "######################################################################"
+ifneq (,$(findstring --upgrade,$(install_o)))
+	@echo "################################################################################################"
+	@echo "# Found --upgrade, not compatible with old fashion install, cleaning directory content instead #"
+	@echo "################################################################################################"
+	# Remove it from install options
+	$(eval install_o := $(filter-out --upgrade,$(install_o)))
+	rm -Rf ${BUILD_DIR}/*
+endif
 	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
-	@$(eval install_o ?=)
-	ansible-galaxy collection install $(install_o) ${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
+	ansible-galaxy collection install $(install_o) $(source)
 else
 install:
-	@$(eval install_o ?=)
+	$(eval install_o ?=)
 	ansible-galaxy collection install $(install_o) .
 endif
 
