@@ -4,8 +4,10 @@
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
 name: Sanity
 on:
-  # Run CI against all pushes (direct commits, also merged PRs), Pull Requests
+  # Run CI against all pushes to main branch (direct commits, also merged PRs) and Pull Requests
   push:
+    branches:
+      - master
   pull_request:
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version

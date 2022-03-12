@@ -8,19 +8,14 @@ from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_valid
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
-    from typing import Tuple, Union, Optional, Dict, List, Text, TypeVar
-
-    class PluginArgSpecReturnRes(Dict):
-        failed: bool
-        errors: List[Text]
-        msg: Optional[Text]
-
-    PluginArgSpecReturnResType = TypeVar('PluginArgSpecReturnResType', bound=PluginArgSpecReturnRes)
-    PluginArgSpecReturn = Tuple[PluginArgSpecReturnResType, Dict]
-    ArgSpecReturn = Tuple[bool, List[Text], Dict]
-
-    ArgSpecSchema = Union[Dict, Text]
-    ArgSpecOptionalSchema = Optional[Dict]
+    from typing import Dict, Text
+    from .args_validation_typing import (
+        ArgSpecSchema,
+        ArgSpecOptionalSchema,
+        ArgSpecOptionalSchema,
+        ArgSpecReturn,
+        PluginArgSpecReturn,
+    )
 
 
 def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=None, other_args=None):
@@ -54,7 +49,8 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     return valid, errors, updated_params
 
 
-def check_plugin_argspec(plugin_name, plugin_args, schema, schema_format="doc", schema_conditionals=None, other_args=None):
+def check_plugin_argspec(plugin_name, plugin_args, schema, schema_format="doc", schema_conditionals=None,
+                         other_args=None):
     # type: (Text, Dict, ArgSpecSchema, Text, ArgSpecOptionalSchema, ArgSpecOptionalSchema) -> PluginArgSpecReturn
     """
     Same as the original C(check_argspec) but with typehint (and removal of useless 'valid' property)

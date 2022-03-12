@@ -19,15 +19,19 @@ from ansible.plugins.connection import ConnectionBase
 from ansible.template import Templar
 from ansible.utils.display import Display
 
-from ..plugin_utils.args_validation import check_plugin_argspec
 from ..plugin_utils.execute_plugins import execute_action, execute_lookup
 from ..plugin_utils.path import get_collection_path
+from ..plugin_utils.args_validation import check_plugin_argspec
 
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
     from typing import Text, Optional, Dict, Any, List
-    from ..plugin_utils import args_validation as args_typing
+    from ..plugin_utils.args_validation_typing import (
+        ArgSpecSchema,
+        ArgSpecOptionalSchema,
+        PluginArgSpecReturn,
+    )
 
 
 class ActionBase(AnsibleActionBase):
@@ -79,12 +83,12 @@ class ActionBase(AnsibleActionBase):
     def check_argspec(
         self,  # type: ActionBase
         args,  # type: Dict
-        schema,  # type: args_typing.ArgSpecSchema
+        schema,  # type: ArgSpecSchema
         schema_format='doc',  # type: Text
-        schema_conditionals=None,  # type: args_typing.ArgSpecOptionalSchema
-        other_args=None  # type: args_typing.ArgSpecOptionalSchema
+        schema_conditionals=None,  # type: ArgSpecOptionalSchema
+        other_args=None  # type: ArgSpecOptionalSchema
     ):
-        # type: (...) -> args_typing.PluginArgSpecReturn
+        # type: (...) -> PluginArgSpecReturn
         return check_plugin_argspec(self._task.get_name(), args, schema, schema_format, schema_conditionals, other_args)
 
     def _execute_module(self,  # type: ActionBase

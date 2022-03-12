@@ -9,16 +9,20 @@ from ansible.errors import AnsibleLookupError
 from ansible.parsing.dataloader import DataLoader
 from ansible.plugins.lookup import LookupBase as AnsibleLookupBase
 from ansible.template import Templar
-from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_validate import check_argspec
 
 from ..plugin_utils.execute_plugins import execute_lookup
+from ..plugin_utils.args_validation import check_plugin_argspec
 
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
     from typing import Text, Optional, Dict, Any, List, Tuple, Type
-    from ..plugin_utils.args_validation import ArgSpecSchema, ArgSpecOptionalSchema, PluginArgSpecReturn, ArgSpecSchema, \
-        check_plugin_argspec
+    from ..plugin_utils.args_validation_typing import (
+        ArgSpecSchema,
+        ArgSpecOptionalSchema,
+        PluginArgSpecReturn,
+        ArgSpecSchema,
+    )
 
 
 class LookupBase(AnsibleLookupBase):
