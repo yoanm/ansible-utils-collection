@@ -134,7 +134,7 @@ test-ansible-integration: ## 🏃 Launch ansible integration tests
 test-ansible-integration: integration_o?=--color
 test-ansible-integration:
 	@$(eval integration_o ?=)
-	@echo "TODO"
+	cd ${COLLECTION_BUILD_DIR} && ansible-test integration $(integration_o)
 
 .PHONY: test-ansible-sanity
 test-ansible-sanity: ## 🏃 Launch ansible sanity checks.
