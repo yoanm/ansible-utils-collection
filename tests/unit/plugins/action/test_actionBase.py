@@ -147,7 +147,3 @@ class SimpleActionModule(unittest.TestCase):
 
         with open(file_path) as f:
             self.assertEqual(f.read(), my_content)
-
-
-if __name__ == '__main__':
-    unittest.main()
