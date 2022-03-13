@@ -43,6 +43,9 @@ class ActionBase(AnsibleActionBase):
     _shared_loader_obj = None  # type: Any
     _display = None  # type: Display
 
+    DOCUMENTATION = None  # type: Optional[Text]
+    ARGUMENTS_SPEC = None  # type: Optional[Dict]
+
     # def __init__(self, task: Task, connection: ConnectionBase, play_context: PlayContext, loader: DataLoader,
     #              templar: Templar, shared_loader_obj: Any):
     #     super(ActionBase, self).__init__(task, connection, play_context, loader, templar, shared_loader_obj)
@@ -175,19 +178,20 @@ class ActionBase(AnsibleActionBase):
 
     def __validate_args(self, result):
         # type: (ActionBase, Dict) -> None
-        doc = getattr(self, "DOCUMENTATION", None)
+        doc = self.DOCUMENTATION
         if doc is not None:
             check_res, self._task.args = self.check_argspec(args=self._task.args, schema=doc)
-            if not check_res['failed']:
+            if check_res['failed']:
                 result.update(check_res)
         else:
-            args_spec = getattr(self, "ARGUMENTS_SPEC", None)
+            args_spec = self.ARGUMENTS_SPEC
             if args_spec is not None:
                 self._display.display('args_spec=%s' % args_spec)
                 check_res, self._task.args = self.check_argspec(args=self._task.args,
                                                                 schema=dict(argument_spec=args_spec),
                                                                 schema_format='argspec')
-                if not check_res['failed']:
+
+                if check_res['failed']:
                     result.update(check_res)
 
     def _mirror_remote_file(self, source, dest):

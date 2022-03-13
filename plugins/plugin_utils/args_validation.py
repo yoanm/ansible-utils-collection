@@ -40,7 +40,7 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     # Always return a list of error string
     if not valid and not isinstance(errors, list):
         errors = [errors]
-    else:
+    elif valid:
         errors = []
 
     # Always return a dict for updated_params
@@ -75,6 +75,7 @@ def check_plugin_argspec(
     )
     # Ensure default values
     check_res = dict(errors=[], failed=(not valid), msg=None)  # type: PluginArgSpecReturnRes
+
     # Always return a list of error string
     if not valid:
         check_res["errors"] = errors
