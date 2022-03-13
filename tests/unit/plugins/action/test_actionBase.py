@@ -95,7 +95,10 @@ class SimpleActionModule(unittest.TestCase):
 
         expected_res = dict(failed=True, errors=['missing required arguments: name'])
         actual_res = plugin.run()
-        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
+        actual_res_sanitized = dict()
+        for key in expected_res.keys():
+            if key in actual_res:
+                actual_res_sanitized[key] = actual_res[key]
 
         self.assertDictEqual(actual_res_sanitized, expected_res)
 
@@ -104,7 +107,10 @@ class SimpleActionModule(unittest.TestCase):
 
         expected_res = dict(failed=True, errors=['missing required arguments: name'])
         actual_res = plugin.run()
-        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
+        actual_res_sanitized = dict()
+        for key in expected_res.keys():
+            if key in actual_res:
+                actual_res_sanitized[key] = actual_res[key]
 
         self.assertDictEqual(actual_res_sanitized, expected_res)
 
@@ -123,7 +129,7 @@ class SimpleActionModule(unittest.TestCase):
         # Remove doubles
         actual_res_sanitized = list(dict.fromkeys(actual_res))
 
-        self.assertEqual(actual_res, actual_res_sanitized)
+        self.assertEqual(actual_res.sort(), actual_res_sanitized.sort())
 
     def test_create_local_tempfile_method(self):
         self.skipTest('TODO !')
