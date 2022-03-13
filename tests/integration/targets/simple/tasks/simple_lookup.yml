@@ -1,0 +1,21 @@
+---
+
+- name: Test simple lookup
+  ignore_errors: true
+  ignore_unreachable: true
+  set_fact:
+    simple_lookup_var: "{{ lookup('simple_lookup', 'a') }}"
+  register: test_simple_lookup_res
+
+- name: Check simple lookup result
+  assert:
+    that:
+      - "simple_lookup_var | type_debug == 'dict'"
+      - "{'kwargs': {}, 'terms': ['a']} == simple_lookup_var"
+
+- name: Check simple lookup result
+  assert:
+    that:
+      - "test_simple_lookup_res | type_debug == 'dict'"
+      - "test_simple_lookup_res['changed'] == false"
+      - "test_simple_lookup_res['failed'] == false"
