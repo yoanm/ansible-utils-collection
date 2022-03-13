@@ -83,7 +83,10 @@ class SimpleActionModule(unittest.TestCase):
 
         expected_res = dict(changed=False, skipped=False, failed=False, my_result='a_result')
         actual_res = plugin.run()
-        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
+        actual_res_sanitized = dict()
+        for key in expected_res.keys():
+            if key in actual_res:
+                actual_res_sanitized[key] = actual_res[key]
 
         self.assertDictEqual(actual_res_sanitized, expected_res)
 
@@ -116,7 +119,7 @@ class SimpleActionModule(unittest.TestCase):
     def test_generate_tmp_filename_method(self):
         plugin = self._init_plugin(ConcreteActionModuleWithArgSpec)
 
-        actual_res = [plugin._generate_tmp_filename() for i in range(0, 10)]
+        actual_res = [plugin._generate_tmp_filename() for i in range(0, 3)]
         # Remove doubles
         actual_res_sanitized = list(dict.fromkeys(actual_res))
 
