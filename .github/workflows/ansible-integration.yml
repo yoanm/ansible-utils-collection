@@ -26,7 +26,7 @@ env:
   C_NAMESPACE: yoanm
   C_NAME: utils
   BUILD_DIR: '/tmp/build'
-  CACHE_VERSION: 2022031303 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031304 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
@@ -151,7 +151,7 @@ jobs:
           name: "integration-test-${{ matrix.ansible }}"
           flags: "integrationtests,ansible-${{ matrix.ansible }},ansible-${{ matrix.ansible }}-py${{ matrix.python }}"
           fail_ci_if_error: true
-          verbose: true
+          #verbose: true
           root_dir: "${{env.BUILD_DIR}}/ansible_collections/${{env.C_NAMESPACE}}/${{env.C_NAME}}"
           working-directory: "${{env.BUILD_DIR}}/ansible_collections/${{env.C_NAMESPACE}}/${{env.C_NAME}}"
 
