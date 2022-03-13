@@ -92,7 +92,7 @@ class ActionBase(AnsibleActionBase):
         other_args=None  # type: ArgSpecOptionalSchema
     ):  # type: (...) -> PluginArgSpecReturn
         return check_plugin_argspec(
-            self._task.resolved_action,
+            self._task.action,
             args,
             schema,
             schema_format,
