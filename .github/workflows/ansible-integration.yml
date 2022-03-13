@@ -7,21 +7,22 @@
 # multiple versions see the following for an example:
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 name: Ansible integration tests
-on: repository_dispatch # Just to keep it but without automatic run
-#  # Run CI against all pushes to main branch (direct commits, also merged PRs)
-#  push:
-#    branches: [master]
-#  # And for Pull Requests on main branch if a related path is updated
-#  pull_request:
-#    branches: [master]
-#    paths:
-#      - plugins/**
-#      - tests/integration/**
-#      - .github/workflows/ansible-integration.yml
-#  # Run once a month (at 10:00 UTC the 26th)
-#  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
-#  schedule:
-#    - cron: '0 10 26 * *'
+on:
+  # Run CI against all pushes to main branch (direct commits, also merged PRs)
+  push:
+    branches: [master]
+  # And for Pull Requests on main branch if a related path is updated
+  pull_request:
+    branches: [master]
+    paths:
+      - plugins/**
+      - tests/mocks/**
+      - tests/integration/**
+      - .github/workflows/ansible-integration.yml
+  # Run once a month (at 10:00 UTC the 26th)
+  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
+  schedule:
+    - cron: '0 10 26 * *'
 env:
   C_NAMESPACE: yoanm
   C_NAME: utils

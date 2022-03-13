@@ -12,6 +12,7 @@ on:
   pull_request:
     paths:
       - plugins/**
+      - tests/mocks/**
       - tests/unit/**
       - .github/workflows/ansible-units.yml
   # Run once a month (at 06:00 UTC the 12th)

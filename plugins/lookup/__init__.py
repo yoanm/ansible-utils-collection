@@ -63,7 +63,6 @@ class LookupBase(AnsibleLookupBase):
         # type: (LookupBase, Dict) -> Tuple[bool, Optional[Text], Dict]
         vars_spec = getattr(self, "VARIABLES_SPEC", None)
         if vars_spec is not None:
-            self._display.display('vars_spec=%s' % vars_spec)
             check_res, valid_vars = self._check_varspec(args=variables,
                                                         schema=dict(argument_spec=vars_spec),
                                                         schema_format='argspec')
