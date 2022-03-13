@@ -1,0 +1,45 @@
+---
+- name: Inital variables
+  set_fact:
+    local_tmpfile_content: |
+      My tmpfile content
+      bla bla bla
+
+- block:
+    - name: Test generate local tmpfile
+      ignore_errors: true
+      ignore_unreachable: true
+      action_with_file_management:
+        generate_local_tmpfile: true
+        local_tmpfile_content: "{{ local_tmpfile_content }}"
+      register: test_generate_local_tmpfile_res
+
+    - name: Check generate local tmpfile result
+      assert:
+        that:
+          - "test_generate_local_tmpfile_res | type_debug == 'dict'"
+          - "test_generate_local_tmpfile_res['changed'] == false"
+          - "test_generate_local_tmpfile_res['skipped'] == false"
+          - "test_generate_local_tmpfile_res['failed'] == false"
+
+    - name: Check if file content is the expected one
+      delegate_to: localhost
+      check_mode: yes
+      copy:
+        dest: "{{ test_generate_local_tmpfile_res.file_path }}"
+        remote_src: true
+        content: "{{ local_tmpfile_content }}"
+      register: file_content_step_res
+
+    - name: Validate previous step
+      assert:
+        that:
+          - "file_content_step_res['failed'] == false"
+          - "file_content_step_res['changed'] == false"
+
+  always:
+    - name: Clean generated file
+      ignore_errors: true
+      file:
+        path: "{{ test_generate_local_tmpfile_res.file_path }}"
+        state: absent

@@ -48,3 +48,20 @@
       - "test_simple_action_with_param_with_unexpected_param['failed'] == true"
       - "'Errors during argspec validation for simple_action_with_param plugin' == test_simple_action_with_param_with_unexpected_param['msg']"
       - "['Unsupported parameters for \\'simple_action_with_param\\' module: unexpected_param Supported parameters include: name'] == test_simple_action_with_param_with_unexpected_param['errors']"
+
+- name: Test simple action with exception
+  ignore_errors: true
+  ignore_unreachable: true
+  simple_action_with_exception:
+  register: test_simple_action_with_exception
+
+- name: Check simple action with exception result
+  assert:
+    that:
+      - "test_simple_action_with_exception | type_debug == 'dict'"
+      - "test_simple_action_with_exception['changed'] == false"
+      - "test_simple_action_with_exception['skipped'] == false"
+      - "test_simple_action_with_exception['failed'] == true"
+      - "test_simple_action_with_exception['error'] == 'Argh !'"
+      - "'exception' in test_simple_action_with_exception"
+      - "test_simple_action_with_exception['exception']  | regex_search('^Traceback (most recent call last):') == none"
