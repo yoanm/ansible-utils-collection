@@ -65,7 +65,6 @@ class ActionBase(AnsibleActionBase):
         if result.get('failed'):
             return result
 
-
         # Execute internal method
         # try:
         return self._run(task_vars=task_vars, result=result)
