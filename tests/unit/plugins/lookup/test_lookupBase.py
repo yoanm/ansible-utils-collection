@@ -20,30 +20,6 @@ class ConcreteLookup(LookupBase):
         return ['my_result']
 
 
-class ConcreteLookupWithDoc(ConcreteLookup):
-    DOCUMENTATION = r'''
----
-options:
-  name:
-    description:
-    - A name
-    type: str
-    required: yes
-  path:
-    description:
-    - A path
-    type: string
-    required: no
-'''
-
-
-class ConcreteLookupWithArgSpec(ConcreteLookup):
-    ARGUMENTS_SPEC = BINARY_ARGS_SPEC = dict(
-        name=dict(type='str', required=True),
-        path=dict(type='str'),
-    )
-
-
 class SimpleLookup(unittest.TestCase):
     def setUp(self):
         self.fake_loader = DictDataLoader({})
@@ -60,14 +36,6 @@ class SimpleLookup(unittest.TestCase):
 
     def test_base_runnable(self):
         plugin = self._init_plugin()
-
-        expected_res = ['my_result']
-        actual_res = plugin.run([])
-
-        self.assertListEqual(actual_res, expected_res)
-
-    def test_doc_validation(self):
-        plugin = self._init_plugin(ConcreteLookupWithDoc)
 
         expected_res = ['my_result']
         actual_res = plugin.run([])
