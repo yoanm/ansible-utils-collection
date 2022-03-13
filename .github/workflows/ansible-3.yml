@@ -123,15 +123,17 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
         with:
-          key: ${{env.CACHE_VERSION}}-integration-tests-docker-cache-ansible-${{ matrix.ansible }}-${{ matrix.python }}-{hash}
-          restore-keys: ${{env.CACHE_VERSION}}-integration-tests-docker-cache-ansible-${{ matrix.ansible }}-${{ matrix.python }}-
+          key: ${{env.CACHE_VERSION}}-integration-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-${{ matrix.python }}-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-integration-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-${{ matrix.python }}-
 
       # Avoid using galaxy usage if deps are already downloaded one time
       - name: Cache Build directory
+        # Deactivate cache for 2.9 and 2.10 as there is no upgrade mechanism (--upgrade) !
+        if: ${{ matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' }}
         uses: actions/cache@v2
         with:
           path: ${{env.BUILD_DIR}}
-          key: ${{env.CACHE_VERSION}}-integration-tests-build_dir-cache-ansible-${{ matrix.ansible }}
+          key: ${{env.CACHE_VERSION}}-integration-tests-build_dir-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}
 
       - name: Configure test environment
         run: make configure-test-env mode="integration" && make build-for-test

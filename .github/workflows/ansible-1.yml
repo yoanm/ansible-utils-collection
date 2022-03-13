@@ -50,8 +50,8 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
         with:
-          key: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ matrix.ansible }}-{hash}
-          restore-keys: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ matrix.ansible }}-
+          key: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-unit-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-
 
       # Avoid using galaxy usage if deps are already downloaded one time
       - name: Cache Build directory
@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{env.BUILD_DIR}}
-          key: ${{env.CACHE_VERSION}}-unit-tests-build_dir-cache-ansible-${{ matrix.ansible }}
+          key: ${{env.CACHE_VERSION}}-unit-tests-build_dir-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}
 
       - name: Configure test environment
         run: make configure-test-env mode="units" && make build-for-test
