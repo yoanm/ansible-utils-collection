@@ -16,8 +16,8 @@ on:
 env:
   C_NAMESPACE: yoanm
   C_NAME: utils
-  BUILD_DIR: '~/build'
-  CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
+  BUILD_DIR: '/tmp/build'
+  CACHE_VERSION: 2022031303 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-sanity-tests-${{ github.ref || github.head_ref }}
@@ -41,9 +41,10 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v2
+        with:
           # it is just required to run that once as "ansible-test sanity" in the docker image
           # will run on all python versions it supports.
-#          python-version: 3.8
+          python-version: 3.8
 
       # Install the head of the given branch (devel, stable-2.10)
       - name: Install ansible (${{ matrix.ansible }})
@@ -72,7 +73,7 @@ jobs:
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
       - name: Run sanity tests
-        run: make test-ansible-sanity sanity_o="--docker --color --coverage --requirements"
+        run: make test-ansible-sanity sanity_o="-v --docker --color --coverage --requirements"
 
       # ansible-test support producing code coverage
       - name: Generate coverage report

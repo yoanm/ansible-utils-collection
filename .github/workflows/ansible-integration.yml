@@ -25,8 +25,8 @@ on: repository_dispatch # Just to keep it but without automatic run
 env:
   C_NAMESPACE: yoanm
   C_NAME: utils
-  BUILD_DIR: '~/build'
-  CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
+  BUILD_DIR: '/tmp/build'
+  CACHE_VERSION: 2022031303 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
