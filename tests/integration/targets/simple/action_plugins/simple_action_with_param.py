@@ -9,10 +9,7 @@ from ansible_collections.yoanm.utils.plugins.action import ActionBase
 
 
 class ActionModule(ActionBase):
-    ARGUMENTS_SPEC = dict(
-        name=dict(type='str', required=True),
-        path=dict(type='str', default='default_path'),
-    )
+    ARGUMENTS_SPEC = dict(name=dict(type='str', required=True))
 
     def _run(self, task_vars, result):
         # type: (ActionModule, Dict, Dict) -> Dict

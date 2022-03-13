@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
-      max-parallel: 6
+      max-parallel: 4
       fail-fast: ${{ github.ref != 'master' }}
       matrix:
         ansible:
