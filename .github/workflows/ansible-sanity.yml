@@ -14,6 +14,8 @@ on:
   schedule:
     - cron: '0 6 12 * *'
 env:
+  C_NAMESPACE: yoanm
+  C_NAME: utils
   BUILD_DIR: '~/build'
   CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
 
@@ -80,4 +82,6 @@ jobs:
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
         with:
-          fail_ci_if_error: false
+          name: "sanity-tests-${{ matrix.ansible }}"
+          root_dir: ${{env.BUILD_DIR}}/${{env.C_NAMESPACE}}/${{env.C_NAME}}
+          flags: "sanitytests,ansible-${{ matrix.ansible }}"
