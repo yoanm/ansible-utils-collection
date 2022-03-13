@@ -116,17 +116,17 @@ class SimpleActionModule(unittest.TestCase):
     def test_generate_tmp_filename_method(self):
         plugin = self._init_plugin(ConcreteActionModuleWithArgSpec)
 
-        actual_res = [plugin._generate_tmp_filename() for _ in range(0, 10)]
+        actual_res = [plugin._generate_tmp_filename() for i in range(0, 10)]
         # Remove doubles
         actual_res_sanitized = list(dict.fromkeys(actual_res))
 
         self.assertEqual(actual_res, actual_res_sanitized)
 
-
     def test_create_local_tempfile_method(self):
         self.skipTest('TODO !')
         plugin = self._init_plugin(ConcreteActionModuleWithArgSpec)
         my_content = bytes(getrandbits(32))
+
         def side_effect(arg):
             if arg == 'system_tmpdirs':
                 return ['/tmp']
@@ -138,7 +138,6 @@ class SimpleActionModule(unittest.TestCase):
 
         with open(file_path) as f:
             self.assertEqual(f.read(), my_content)
-
 
 
 if __name__ == '__main__':
