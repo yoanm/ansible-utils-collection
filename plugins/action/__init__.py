@@ -265,8 +265,10 @@ class ActionBase(AnsibleActionBase):
                 file_handler.write(content)
                 file_handler.close()
         except Exception as err:
-            os.remove(tmp_file_path)
-            raise AnsibleActionFail(err)
+            try:
+                os.remove(tmp_file_path)
+            finally:
+                raise AnsibleActionFail(orig_exc=err)
 
         return tmp_file_path
 

@@ -39,6 +39,7 @@
 
   always:
     - name: Clean generated file
+      ignore_errors: true
       file:
         path: "{{ test_generate_local_tmpfile_res.file_path }}"
         state: absent
