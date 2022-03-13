@@ -83,6 +83,8 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           name: "sanity-tests-${{ matrix.ansible }}"
-          root_dir: ${{env.BUILD_DIR}}/${{env.C_NAMESPACE}}/${{env.C_NAME}}
           flags: "sanitytests,ansible-${{ matrix.ansible }}"
+          fail_ci_if_error: true
           verbose: true
+          root_dir: "${{env.BUILD_DIR}}/ansible_collections/${{env.C_NAMESPACE}}/${{env.C_NAME}}"
+          working-directory: "${{env.BUILD_DIR}}/ansible_collections/${{env.C_NAMESPACE}}/${{env.C_NAME}}"
