@@ -114,10 +114,19 @@ class SimpleActionModule(unittest.TestCase):
 
         self.assertDictEqual(actual_res_sanitized, expected_res)
 
+    # @TODO move as integration tests and check if playbook can override the file
     def test_find_needle_in_collection_method(self):
         plugin = self._init_plugin(ConcreteActionModuleWithArgSpec)
 
         actual_res = plugin._find_needle_in_collection('ansible_collections.yoanm.utils', 'plugins', 'README.md')
+        expected_res = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../../plugins/README.md'))
+
+        self.assertEqual(actual_res, expected_res)
+
+    def test_find_needle_in_collection_with_collection_first_method(self):
+        plugin = self._init_plugin(ConcreteActionModuleWithArgSpec)
+
+        actual_res = plugin._find_needle_in_collection('ansible_collections.yoanm.utils', 'plugins', 'README.md', True)
         expected_res = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../../plugins/README.md'))
 
         self.assertEqual(actual_res, expected_res)
