@@ -268,7 +268,10 @@ class ActionBase(AnsibleActionBase):
             try:
                 os.remove(tmp_file_path)
             finally:
-                raise AnsibleActionFail(orig_exc=err)
+                raise AnsibleActionFail(
+                    'Error during local tmpfile creation: %s' % to_native(err),
+                    orig_exc=err
+                )
 
         return tmp_file_path
 
