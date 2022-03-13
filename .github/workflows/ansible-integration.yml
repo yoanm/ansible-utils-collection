@@ -26,7 +26,7 @@ env:
   C_NAMESPACE: yoanm
   C_NAME: utils
   BUILD_DIR: '/tmp/build'
-  CACHE_VERSION: 2022031304 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031305 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
