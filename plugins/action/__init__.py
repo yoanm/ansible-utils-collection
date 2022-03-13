@@ -5,6 +5,7 @@ __metaclass__ = type
 
 import base64
 import os.path
+import traceback
 from abc import abstractmethod
 from random import getrandbits
 
@@ -43,8 +44,11 @@ class ActionBase(AnsibleActionBase):
     _shared_loader_obj = None  # type: Any
     _display = None  # type: Display
 
+    _validated_args = dict()  # type: Dict
+
     DOCUMENTATION = None  # type: Optional[Text]
     ARGUMENTS_SPEC = None  # type: Optional[Dict]
+    CONDITIONAL_ARGUMENTS_SPEC = None  # type: Optional[Dict]
 
     # def __init__(self, task: Task, connection: ConnectionBase, play_context: PlayContext, loader: DataLoader,
     #              templar: Templar, shared_loader_obj: Any):
@@ -66,15 +70,15 @@ class ActionBase(AnsibleActionBase):
             return result
 
         # Execute internal method
-        # try:
-        return self._run(task_vars=task_vars, result=result)
-        # except Exception as exc:
-        #    self._display.error('Error occurred during action execution: %s' % exc)
-        #    result['failed'] = True
-        #    result['error'] = to_text(exc)
-        #    result['exception'] = traceback.format_exc()
+        try:
+            return self._run(task_vars=task_vars, result=result)
+        except Exception as exc:
+            self._display.error('Error occurred during action execution: %s' % exc)
+            result['failed'] = True
+            result['error'] = to_native(exc)
+            result['exception'] = traceback.format_exc()
 
-        # return result
+        return result
 
     @abstractmethod
     def _run(self, task_vars, result):
@@ -185,16 +189,27 @@ class ActionBase(AnsibleActionBase):
     def __validate_args(self, result):
         # type: (ActionBase, Dict) -> None
         doc = self.DOCUMENTATION
+        cond_args_spec = self.CONDITIONAL_ARGUMENTS_SPEC
+        validated = False
         if doc is not None:
-            check_res, self._task.args = self.check_argspec(args=self._task.args, schema=doc)
+            check_res, self._validated_args = self.check_argspec(
+                args=self._task.args,
+                schema=doc,
+                schema_conditionals=cond_args_spec,
+            )
+            validated = True
             if check_res['failed']:
                 result.update(check_res)
         else:
             args_spec = self.ARGUMENTS_SPEC
             if args_spec is not None:
-                check_res, self._task.args = self.check_argspec(args=self._task.args,
-                                                                schema=dict(argument_spec=args_spec),
-                                                                schema_format='argspec')
+                check_res, self._validated_args = self.check_argspec(
+                    args=self._task.args,
+                    schema=dict(argument_spec=args_spec),
+                    schema_format='argspec',
+                    schema_conditionals=cond_args_spec,
+                )
+                validated = True
                 if check_res['failed']:
                     result.update(check_res)
 
@@ -210,8 +225,8 @@ class ActionBase(AnsibleActionBase):
         if result.get('rc', None) != 0:
             raise AnsibleActionFail('Error during remote file mirroring: %s' % result)
 
-    def _fetch_remote_file_to_local_tmp(self, task_vars, remote_source):
-        # type: (ActionBase, Dict, Text) -> Text
+    def _fetch_remote_file_to_local_tmp(self, remote_source, task_vars):
+        # type: (ActionBase, Text, Dict) -> Text
         """
         :param task_vars:
         :param remote_source: Remote source file path
@@ -262,7 +277,7 @@ class ActionBase(AnsibleActionBase):
 
         :return: filename
         """
-        return str(self._task.get_name()) + '-' + str(getrandbits(32)) + '.tmp'
+        return str(self._task.action) + '-' + str(getrandbits(32)) + '.tmp'
 
     def _generate_remote_tmp_file_path(self):
         # type: (ActionBase) -> Text
