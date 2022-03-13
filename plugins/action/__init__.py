@@ -5,6 +5,7 @@ __metaclass__ = type
 
 import base64
 import os.path
+import sys
 import traceback
 from abc import abstractmethod
 from random import getrandbits
@@ -190,14 +191,12 @@ class ActionBase(AnsibleActionBase):
         # type: (ActionBase, Dict) -> None
         doc = self.DOCUMENTATION
         cond_args_spec = self.CONDITIONAL_ARGUMENTS_SPEC
-        validated = False
         if doc is not None:
             check_res, self._validated_args = self.check_argspec(
                 args=self._task.args,
                 schema=doc,
                 schema_conditionals=cond_args_spec,
             )
-            validated = True
             if check_res['failed']:
                 result.update(check_res)
         else:
@@ -209,7 +208,6 @@ class ActionBase(AnsibleActionBase):
                     schema_format='argspec',
                     schema_conditionals=cond_args_spec,
                 )
-                validated = True
                 if check_res['failed']:
                     result.update(check_res)
 
@@ -261,9 +259,10 @@ class ActionBase(AnsibleActionBase):
         """
         tmp_file_path = self._generate_local_tmp_file_path()
         try:
-            with open(tmp_file_path, "xb") as file_handler:
+            # 'x' doesn't seem managed with python 2.7
+            mode = 'ab' if sys.version_info < (2, 8) else 'xb'
+            with open(tmp_file_path, mode) as file_handler:
                 file_handler.write(content)
-                file_handler.close()
         except Exception as err:
             try:
                 os.remove(tmp_file_path)
