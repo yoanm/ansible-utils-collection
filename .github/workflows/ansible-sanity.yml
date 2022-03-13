@@ -1,0 +1,83 @@
+###
+# Sanity tests (REQUIRED)
+#
+# https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
+name: Sanity
+on:
+  # Run CI against all pushes to main branch (direct commits, also merged PRs)
+  push:
+    branches: [master]
+  # And for all Pull Requests
+  pull_request:
+  # Run once a month (at 06:00 UTC the 12th)
+  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
+  schedule:
+    - cron: '0 6 12 * *'
+env:
+  BUILD_DIR: '~/build'
+  CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
+
+concurrency:
+  group: ansible-sanity-tests-${{ github.ref || github.head_ref }}
+  cancel-in-progress: ${{ github.ref != 'master' }}
+jobs:
+  sanity:
+    name: Sanity ${{ matrix.ansible }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible:
+#          # - stable-2.9 # Only if your collection supports Ansible 2.9
+          - stable-2.10
+          - stable-2.11
+          - stable-2.12
+          - devel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+          # it is just required to run that once as "ansible-test sanity" in the docker image
+          # will run on all python versions it supports.
+#          python-version: 3.8
+
+      # Install the head of the given branch (devel, stable-2.10)
+      - name: Install ansible (${{ matrix.ansible }})
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+
+      - name: Docker cache
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+        with:
+          key: ${{env.CACHE_VERSION}}-sanity-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-{hash}
+          restore-keys: ${{env.CACHE_VERSION}}-sanity-tests-docker-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}-
+
+      # Avoid using galaxy usage if deps are already downloaded one time
+      - name: Cache Build directory
+        # Deactivate cache for 2.9 and 2.10 as there is no upgrade mechanism (--upgrade) !
+        if: ${{ matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' }}
+        uses: actions/cache@v2
+        with:
+          path: ${{env.BUILD_DIR}}
+          key: ${{env.CACHE_VERSION}}-sanity-tests-build_dir-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}
+
+      - name: Configure test environment
+        run: make configure-test-env mode="sanity" && make build-for-test
+
+      # run ansible-test sanity inside of Docker.
+      # The docker container has all the pinned dependencies that are required
+      # and all python versions ansible supports.
+      - name: Run sanity tests
+        run: make test-ansible-sanity sanity_o="--docker --color --coverage --requirements"
+
+      # ansible-test support producing code coverage
+      - name: Generate coverage report
+        run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
+
+      # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false

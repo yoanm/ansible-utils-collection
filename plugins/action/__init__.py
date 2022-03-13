@@ -19,15 +19,19 @@ from ansible.plugins.connection import ConnectionBase
 from ansible.template import Templar
 from ansible.utils.display import Display
 
-from ..plugin_utils.args_validation import validate_args, ValidateArgsResult, ValidateArgsSchema
 from ..plugin_utils.execute_plugins import execute_action, execute_lookup
-from ..plugin_utils.path import append_collection_path_to_ansible_search_path, \
-    get_collection_path
+from ..plugin_utils.path import get_collection_path
+from ..plugin_utils.args_validation import check_plugin_argspec
 
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
-    from typing import Text, Optional, Dict, Any, List, Type
+    from typing import Text, Optional, Dict, Any, List
+    from ..plugin_utils.args_validation_typing import (
+        ArgSpecSchema,
+        ArgSpecOptionalSchema,
+        PluginArgSpecReturn,
+    )
 
 
 class ActionBase(AnsibleActionBase):
@@ -52,7 +56,7 @@ class ActionBase(AnsibleActionBase):
         result.update(dict(changed=False, skipped=False, failed=False))
 
         # Validated args specification
-        self.__validate_task_args(result)
+        self.__validate_args(result)
 
         # Early return in case there is already a failure
         if result.get('failed'):
@@ -76,14 +80,16 @@ class ActionBase(AnsibleActionBase):
         Method will be safely executed by C(ActionBase::run)
         """
 
-    @classmethod
-    def _format_args_spec_validation_errors(cls, errors):
-        # type: (Type[ActionBase], List) -> Text
-        return 'Errors during params validation => \n- %s' % "\n- ".join(errors)
-
-    def _check_argspec(self, args, schema, schema_format='doc'):
-        # type: (ActionBase, Dict, ValidateArgsSchema, Text) -> ValidateArgsResult
-        return validate_args(caller=self._task.get_name(), args=args, schema=schema, schema_format=schema_format)
+    def check_argspec(
+        self,  # type: ActionBase
+        args,  # type: Dict
+        schema,  # type: ArgSpecSchema
+        schema_format='doc',  # type: Text
+        schema_conditionals=None,  # type: ArgSpecOptionalSchema
+        other_args=None  # type: ArgSpecOptionalSchema
+    ):
+        # type: (...) -> PluginArgSpecReturn
+        return check_plugin_argspec(self._task.get_name(), args, schema, schema_format, schema_conditionals, other_args)
 
     def _execute_module(self,  # type: ActionBase
                         module_name=None,  # type: Optional[Text]
@@ -167,24 +173,22 @@ class ActionBase(AnsibleActionBase):
         # If nothing found, it will throw an exception
         return self._loader.path_dwim_relative_stack(path_stack, dirname, needle)  # type: ignore
 
-    def __validate_task_args(self, result):
+    def __validate_args(self, result):
         # type: (ActionBase, Dict) -> None
         doc = getattr(self, "DOCUMENTATION", None)
         if doc is not None:
-            valid, errors, self._task.args = self._check_argspec(args=self._task.args, schema=doc)
-            if not valid:
-                result["failed"] = True
-                result["error"] = self._format_args_spec_validation_errors(errors)
+            check_res, self._task.args = self.check_argspec(args=self._task.args, schema=doc)
+            if not check_res['failed']:
+                result.update(check_res)
         else:
             args_spec = getattr(self, "ARGUMENTS_SPEC", None)
             if args_spec is not None:
                 self._display.display('args_spec=%s' % args_spec)
-                valid, errors, self._task.args = self._check_argspec(args=self._task.args,
-                                                                     schema=dict(argument_spec=args_spec),
-                                                                     schema_format='argspec')
-                if not valid:
-                    result["failed"] = True
-                    result["error"] = self._format_args_spec_validation_errors(errors)
+                check_res, self._task.args = self.check_argspec(args=self._task.args,
+                                                                schema=dict(argument_spec=args_spec),
+                                                                schema_format='argspec')
+                if not check_res['failed']:
+                    result.update(check_res)
 
     def _mirror_remote_file(self, source, dest):
         # type: (ActionBase, Text, Text) -> None
