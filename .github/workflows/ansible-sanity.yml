@@ -77,7 +77,7 @@ jobs:
 
       # ansible-test support producing code coverage
       - name: Generate coverage report
-        run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
+        run: make test-ansible-coverage coverage_o="--debug -v --requirements --group-by command --group-by version"
 
       # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
       - name: Upload coverage to codecov
