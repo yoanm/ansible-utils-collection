@@ -12,6 +12,7 @@
 name: CodeQL
 
 on:
+  # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [ master ]
   pull_request:

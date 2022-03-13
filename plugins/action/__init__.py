@@ -90,9 +90,15 @@ class ActionBase(AnsibleActionBase):
         schema_format='doc',  # type: Text
         schema_conditionals=None,  # type: ArgSpecOptionalSchema
         other_args=None  # type: ArgSpecOptionalSchema
-    ):
-        # type: (...) -> PluginArgSpecReturn
-        return check_plugin_argspec(self._task.get_name(), args, schema, schema_format, schema_conditionals, other_args)
+    ):  # type: (...) -> PluginArgSpecReturn
+        return check_plugin_argspec(
+            self._task.action,
+            args,
+            schema,
+            schema_format,
+            schema_conditionals,
+            other_args,
+        )
 
     def _execute_module(self,  # type: ActionBase
                         module_name=None,  # type: Optional[Text]
@@ -186,11 +192,9 @@ class ActionBase(AnsibleActionBase):
         else:
             args_spec = self.ARGUMENTS_SPEC
             if args_spec is not None:
-                self._display.display('args_spec=%s' % args_spec)
                 check_res, self._task.args = self.check_argspec(args=self._task.args,
                                                                 schema=dict(argument_spec=args_spec),
                                                                 schema_format='argspec')
-
                 if check_res['failed']:
                     result.update(check_res)
 
