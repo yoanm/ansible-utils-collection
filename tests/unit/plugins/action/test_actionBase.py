@@ -22,29 +22,84 @@ class ConcreteActionModule(ActionBase):
         return result
 
 
+class ConcreteActionModuleWithDoc(ConcreteActionModule):
+    DOCUMENTATION = r'''
+---
+options:
+  name:
+    description:
+    - A name
+    type: str
+    required: yes
+  path:
+    description:
+    - A path
+    type: string
+    required: no
+'''
+
+
+class ConcreteActionModuleWithArgSpec(ConcreteActionModule):
+    ARGUMENTS_SPEC = BINARY_ARGS_SPEC = dict(
+        name=dict(type='str', required=True),
+        path=dict(type='str'),
+    )
+
+
 class SimpleActionModule(unittest.TestCase):
     def setUp(self):
-        task = MagicMock(Task)
-        task.async_val = None  # Default being 0 but require the action to have _supports_async at True !
-        task.action = "simple_action"
-        task._role = None
-        play_context = MagicMock()
-        play_context.check_mode = False
-        connection = MagicMock()
-        fake_loader = DictDataLoader({})
-        templar = Templar(loader=fake_loader)
-        self._plugin = ConcreteActionModule(
-            task=task,
-            connection=connection,
-            play_context=play_context,
-            loader=fake_loader,
-            templar=templar,
+        self.task = MagicMock(Task)
+        self.task.async_val = None  # Default being 0 but require the action to have _supports_async at True !
+        self.task.action = "simple_action"
+        self.task._role = None
+        self.play_context = MagicMock()
+        self.play_context.check_mode = False
+        self.connection = MagicMock()
+        self.fake_loader = DictDataLoader({})
+        self.templar = Templar(loader=self.fake_loader)
+
+    def _init_plugin(self, plugin_cls=ConcreteActionModule):
+        self._plugin = plugin_cls(
+            task=self.task,
+            connection=self.connection,
+            play_context=self.play_context,
+            loader=self.fake_loader,
+            templar=self.templar,
             shared_loader_obj=None,
         )
 
-    def test_runnable(self):
-        self._plugin._task.args = {}
-        task_vars = {}
+    def test_base_runnable(self):
+        self._init_plugin()
+        self._plugin._task.args = dict()
+        task_vars = dict()
         expected_res = dict(changed=False, skipped=False, failed=False, my_result='a_result')
+        actual_res = self._plugin.run(tmp=None, task_vars=task_vars)
+        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
 
-        self.assertDictEqual(self._plugin.run(tmp=None, task_vars=task_vars), expected_res)
+        self.assertDictEqual(actual_res_sanitized, expected_res)
+
+    def test_doc_validation(self):
+        self._init_plugin(ConcreteActionModuleWithDoc)
+        self._plugin._task.args = dict()
+        task_vars = dict()
+        self.maxDiff = None
+        expected_res = dict(failed=True, errors=['missing required arguments: name'])
+        actual_res = self._plugin.run(tmp=None, task_vars=task_vars)
+        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
+
+        self.assertDictEqual(actual_res_sanitized, expected_res)
+
+    def test_argspec_validation(self):
+        self._init_plugin(ConcreteActionModuleWithArgSpec)
+        self._plugin._task.args = dict()
+        task_vars = dict()
+        self.maxDiff = None
+        expected_res = dict(failed=True, errors=['missing required arguments: name'])
+        actual_res = self._plugin.run(tmp=None, task_vars=task_vars)
+        actual_res_sanitized = dict({key: actual_res[key] for key in expected_res.keys() if key in actual_res})
+
+        self.assertDictEqual(actual_res_sanitized, expected_res)
+
+
+if __name__ == '__main__':
+    unittest.main()
