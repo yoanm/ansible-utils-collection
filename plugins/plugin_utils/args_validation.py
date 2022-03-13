@@ -24,7 +24,7 @@ if MYPY:
         PluginArgSpecReturnRes,
     )
 
-__UNEXPECTED_ARG_ERROR_MATCH_PATTERN = r'^(\w+). Supported parameters include: (.+)\.$'
+__UNEXPECTED_ARG_ERROR_MATCH_PATTERN = r'^(\w+(?:, \w+)?). Supported parameters include: (.+)\.$'
 __UNEXPECTED_ARG_ERROR_TEMPLATE = "Unsupported parameters for '%s' module: %s Supported parameters include: %s"
 
 
