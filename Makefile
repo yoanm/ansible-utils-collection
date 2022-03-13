@@ -76,33 +76,31 @@ build: clean
 .PHONY: install
 install: ## ✍️  Install to a directory (to use the collection inside a playbook for instance)
 #### Use install_o="..." to specify install options (--force, -p PATH, --no-deps, etc)
+$(eval install_o ?=)
 #### Use upgrade=1 instead of install_o="--upgrade" to keep compatibility with ansible below 2.10
+$(eval upgrade ?= 0)
 #### Use source="..." to specify the source
-install: upgrade ?= 0
-install: install_o ?=
-install: source ?= .
-ifeq ($(ANSIBLE_INSTALL_OLD_FASHION),1)
-# Disable upgrade on runtime
-install: upgrade = 0
-ifeq ($(shell if [ "$(source)" = "" ] || [ "$(source)" = "." ]; then echo 1; else echo 0; fi),1)
+$(eval source ?= .)
+ifeq ($(source),.)
 # Clean project in case goal is to install current project
 install: clean
-endif
 endif
 install:
 ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && [ "$(upgrade)" = "1" ]; then echo 1; else echo 0; fi),1)
 	@echo "###################################################################################################"
 	@echo "# Found --upgrade, not compatible with old fashion install. Existing content will be kept as is ! #"
 	@echo "###################################################################################################"
+else ifeq ($(upgrade),1)
+	UPGRADE_OPT=" --upgrade"
 endif
-ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && ([ "$(source)" = "" ] || [ "$(source)" = "." ]); then echo 1; else echo 0; fi),1)
+ifeq ($(shell if [ "$(ANSIBLE_INSTALL_OLD_FASHION)" = "1" ] && [ "$(source)" = "." ]; then echo 1; else echo 0; fi),1)
 	@echo "#########################################"
 	@echo "# Old fashion installation using tar.gz #"
 	@echo "#########################################"
 	$(MAKE) build build_o="--output-path ${BUILD_DIR} --force"
 	ansible-galaxy collection install $(install_o) ${BUILD_DIR}/${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-${COLLECTION_VERSION}.tar.gz
 else
-	ansible-galaxy collection install $(install_o)$(if ($(upgrade),1), --upgrade,) $(source)
+	ansible-galaxy collection install $(install_o)$$UPGRADE_OPT $(source)
 endif
 
 .PHONY: deploy
