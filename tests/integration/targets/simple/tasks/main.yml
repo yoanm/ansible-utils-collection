@@ -47,4 +47,4 @@
       - "test_simple_action_with_param_with_unexpected_param['skipped'] == false"
       - "test_simple_action_with_param_with_unexpected_param['failed'] == true"
       - "'Errors during argspec validation for simple_action_with_param plugin' == test_simple_action_with_param_with_unexpected_param['msg']"
-      - "['unexpected_param. Supported parameters include: name.'] == test_simple_action_with_param_with_unexpected_param['errors']"
+      - "['Unsupported parameters for \\'simple_action_with_param\\' module: unexpected_param Supported parameters include: name'] == test_simple_action_with_param_with_unexpected_param['errors']"
