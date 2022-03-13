@@ -2,7 +2,7 @@
 # Sanity tests (REQUIRED)
 #
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
-name: Sanity
+name: Ansible sanity tests
 on:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
@@ -85,3 +85,4 @@ jobs:
           name: "sanity-tests-${{ matrix.ansible }}"
           root_dir: ${{env.BUILD_DIR}}/${{env.C_NAMESPACE}}/${{env.C_NAME}}
           flags: "sanitytests,ansible-${{ matrix.ansible }}"
+          verbose: true

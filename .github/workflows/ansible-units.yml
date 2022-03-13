@@ -3,7 +3,7 @@
 #
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_units.html
 
-name: Unit tests
+name: Ansible unit tests
 on:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
@@ -91,3 +91,4 @@ jobs:
           name: "unit-test-${{ matrix.ansible }}"
           root_dir: ${{env.BUILD_DIR}}/${{env.C_NAMESPACE}}/${{env.C_NAME}}
           flags: "unittests,ansible-${{ matrix.ansible }}"
+          verbose: true

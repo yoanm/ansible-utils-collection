@@ -6,7 +6,7 @@
 # If the application you are testing is available as a docker container and you want to test
 # multiple versions see the following for an example:
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
-name: Integration
+name: Ansible integration tests
 on: repository_dispatch # Just to keep it but without automatic run
 #  # Run CI against all pushes to main branch (direct commits, also merged PRs)
 #  push:
@@ -151,4 +151,5 @@ jobs:
           name: "integration-test-${{ matrix.ansible }}"
           root_dir: ${{env.BUILD_DIR}}/${{env.C_NAMESPACE}}/${{env.C_NAME}}
           flags: "integrationtests,ansible-${{ matrix.ansible }},ansible-${{ matrix.ansible }}-py${{ matrix.python }}"
+          verbose: true
 
