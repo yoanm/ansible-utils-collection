@@ -4,7 +4,6 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import re
-from typing import List
 
 from ansible.module_utils.common.text.converters import to_native
 from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_validate import AnsibleArgSpecValidator
@@ -14,7 +13,7 @@ from . import ansible_utils
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
-    from typing import Dict, Text
+    from typing import Dict, Text, List
     from .args_validation_typing import (
         ArgSpecSchema,
         ArgSpecOptionalSchema,
