@@ -119,7 +119,7 @@ build-for-test:
 ##—————————— \_ 🐍 Python —————————————————————————————————————————————————
 .PHONY: install-as-python-pkg
 install-as-python-pkg: ## 🔗 Build the collection and mount content as python package to current python environment
-$(eval build_dir = ${BUILD_DIR}/python-pkg)
+$(eval build_dir = /tmp/python-pkg/${COLLECTION_NAMESPACE}-${COLLECTION_NAME})
 $(eval pkg_name = local-${COLLECTION_NAMESPACE}-${COLLECTION_NAME}-ansible-collections)
 install-as-python-pkg: clean
 	rm -rf $(build_dir)/*
