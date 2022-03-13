@@ -4,9 +4,10 @@
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
 name: Sanity
 on:
-  # Run CI against all pushes to main branch (direct commits, also merged PRs) and Pull Requests
+  # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
+  # And for all Pull Requests
   pull_request:
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
@@ -14,7 +15,7 @@ on:
     - cron: '0 6 12 * *'
 env:
   BUILD_DIR: '~/build'
-  CACHE_VERSION: 2022031301 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-sanity-tests-${{ github.ref || github.head_ref }}

@@ -8,26 +8,23 @@
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 name: Integration
 on: repository_dispatch # Just to keep it but without automatic run
-#on:
+#  # Run CI against all pushes to main branch (direct commits, also merged PRs)
 #  push:
 #    branches: [master]
-#    paths:
-#      - 'plugins/**'
-#      - 'tests/integration/**'
-#      - '.github/workflows/ansible-3.yml'
+#  # And for Pull Requests on main branch if a related path is updated
 #  pull_request:
 #    branches: [master]
 #    paths:
-#      - 'plugins/**'
-#      - 'tests/integration/**'
-#      - '.github/workflows/plugins-integration.yml'
+#      - plugins/**
+#      - tests/integration/**
+#      - .github/workflows/ansible-integration.yml
 #  # Run once a month (at 10:00 UTC the 26th)
 #  # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
 #  schedule:
 #    - cron: '0 10 26 * *'
 env:
   BUILD_DIR: '~/build'
-  CACHE_VERSION: 2022031301 # To be able to create a new cache (YYYYMMDDXX)
+  CACHE_VERSION: 2022031302 # To be able to create a new cache (YYYYMMDDXX)
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
