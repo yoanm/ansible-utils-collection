@@ -27,7 +27,7 @@ env:
   CACHE_VERSION: 2022031305 # To be able to create a new cache (YYYYMMDDXX)
   # Makefile options
   BUILD_DIR: '/tmp/build'
-  ENABLE_COVERAGE: 1
+  WITH_COVERAGE: 1
   WITH_DOCKER: 1
   WITH_COVERAGE_REPORT: xml
 
