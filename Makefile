@@ -1,11 +1,19 @@
 # Based on that awesome makefile https://github.com/dunglas/symfony-docker/blob/main/docs/makefile.md#the-template
 
-# Let user override python binary, collection's namespace/name/version if needed
+# Let user override python binary if needed
 PYTHON?=python
+# Ability to enable coverage where it doable
+WITH_COVERAGE?=0
+# Enable docker for ansible tests
+WITH_DOCKER?=0
+# Python target for ansible tests
+WITH_PY_TARGET?=
+# Coverage report type (default to console report)
+WITH_COVERAGE_REPORT?=console
 
-COLLECTION_NAMESPACE?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["namespace"])')
-COLLECTION_NAME?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["name"])')
-COLLECTION_VERSION?=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["version"])')
+COLLECTION_NAMESPACE=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["namespace"])')
+COLLECTION_NAME=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["name"])')
+COLLECTION_VERSION=$(shell $(PYTHON) -c 'import yaml;print(yaml.load(open("galaxy.yml"), yaml.SafeLoader)["version"])')
 
 ANSIBLE_VERSION=$(shell $(PYTHON) -c 'from ansible import __version__ ;print("%s" % ".".join( __version__.split(".")[:2]));')
 # ansible-core below v2.11 doesn't support installing fom current directory if it is not under C_NAMESPACE/C_NAME directories
@@ -22,8 +30,25 @@ BUILD_DIR?=build
 ANSIBLE_COLLECTIONS_BUILD_DIR=${BUILD_DIR}/ansible_collections
 COLLECTION_BUILD_DIR=${ANSIBLE_COLLECTIONS_BUILD_DIR}/${COLLECTION_NAMESPACE}/${COLLECTION_NAME}
 
+ifeq ($(WITH_COVERAGE),1)
+ANSIBLE_COVERAGE_OPTION=--coverage
+else
+ANSIBLE_COVERAGE_OPTION=
+endif
+ifeq ($(WITH_DOCKER),1)
+ANSIBLE_DOCKER_OPTION=--docker
+else
+ANSIBLE_DOCKER_OPTION=
+endif
+ifneq ($(WITH_PY_TARGET),)
+ANSIBLE_PY_TARGET_OPTION=--python $(WITH_PY_TARGET)
+else
+ANSIBLE_PY_TARGET_OPTION=
+endif
+
 .DEFAULT_GOAL = default
 
+.PHONY: default
 default: clean configure-dev-env
 
 ##—— 📚 Help ——————————————————————————————————————————————————————————————
@@ -35,6 +60,7 @@ help: ## ❓ Dislay this help
 		| sed -e 's/\[32m##——/[33m ——/' \
 		| sed -e 's/\[32m####/[34m                                 /' \
 		| sed -e 's/\[32m###/[36m                                 /' \
+		| sed -e 's/\[32m##\?/[35m /'  \
 		| sed -e 's/\[32m##/[33m/'
 
 ##—— ️⚙️  Environments ——————————————————————————————————————————————————————
@@ -79,7 +105,7 @@ install: ## ✍️  Install to a directory (to use the collection inside a playb
 $(eval install_o ?=)
 #### Use upgrade=1 instead of install_o="--upgrade" to keep compatibility with ansible below 2.10
 $(eval upgrade ?= 0)
-#### Use source="..." to specify the source
+#### Use source="..." to specify the source (tar.gz path mostly, default to current directory)
 $(eval source ?= .)
 ifeq ($(source),.)
 # Clean project in case goal is to install current project
@@ -175,29 +201,54 @@ endif
 .PHONY: test-ansible-units
 test-ansible-units: ## 🏃 Launch ansible unit tests
 #### Use units_o="..." to specify options (--color, --docker, --coverage, etc)
-$(eval units_o ?= -v --color --requirements)
+$(eval units_o ?= -v --color --requirements $(ANSIBLE_COVERAGE_OPTION) $(ANSIBLE_DOCKER_OPTION) $(ANSIBLE_PY_TARGET_OPTION))
 test-ansible-units:
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo "~                       ~~ Ansible unit tests ~~                                ~"
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	cd ${COLLECTION_BUILD_DIR} && ansible-test units $(units_o)
 
 .PHONY: test-ansible-integration
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo "~                    ~~ Ansible integration tests ~~                            ~"
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 test-ansible-integration: ## 🏃 Launch ansible integration tests
 #### Use integration_o="..." to specify options (--retry-on-error, --python VERSION, --docker, --coverage, etc)
-$(eval integration_o ?= -v --color --requirements)
+$(eval integration_o ?= -v --color --requirements --diff --retry-on-error --continue-on-error $(ANSIBLE_COVERAGE_OPTION) $(ANSIBLE_DOCKER_OPTION) $(ANSIBLE_PY_TARGET_OPTION))
 test-ansible-integration:
 	cd ${COLLECTION_BUILD_DIR} && ansible-test integration $(integration_o)
 
 .PHONY: test-ansible-sanity
 test-ansible-sanity: ## 🏃 Launch ansible sanity checks.
 #### Use sanity_o="..." to specify options (--test TEST_NAME, --docker, --coverage, etc)
-$(eval sanity_o ?= -v --color --requirements)
+$(eval sanity_o ?= -v --color --requirements $(ANSIBLE_COVERAGE_OPTION) $(ANSIBLE_DOCKER_OPTION) $(ANSIBLE_PY_TARGET_OPTION))
 test-ansible-sanity:
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo "~                      ~~ Ansible sanity tests ~~                               ~"
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	cd ${COLLECTION_BUILD_DIR} && ansible-test sanity $(sanity_o)
 
 .PHONY: test-ansible-coverage
-test-ansible-coverage: ## 🏃 Launch ansible coverage generation (xml by default)
+test-ansible-coverage: ## 🏃 Launch ansible coverage generation ("report" by default, for console report)
 #### Use coverage_o="..." to specify options (--requirements, --group-by GROUP, etc)
 $(eval coverage_o ?= -v --color --requirements)
 #### Use coverage_c="..." to specify coverage command (report, html, combine, etc)
-$(eval coverage_c ?= xml)
+ifeq ($(WITH_COVERAGE_REPORT),console)
+$(eval coverage_c ?= report)
+test-ansible-coverage: coverage_c?=report
+else
+$(eval coverage_c ?= $(WITH_COVERAGE_REPORT))
+test-ansible-coverage: coverage_c?=$(WITH_COVERAGE_REPORT)
+endif
 test-ansible-coverage:
-	cd ${COLLECTION_BUILD_DIR} && ansible-test coverage $(coverage_c) $(coverage_o); \
+	cd ${COLLECTION_BUILD_DIR} && ansible-test coverage $(coverage_c) $(coverage_o);
+
+##—— 🔧 Options ——————————————————————————————————————————————————————————————
+##? Python binary:    Use `PYTHON=... make TARGET` to override Python binary used (default to "python")
+##? Build directory:  Use `BUILD_DIR=... make TARGET` to override build directory (default to "build" directory inside project
+##  🇦 Ansible
+##? Docker:           Use `WITH_DOCKER=1 make TARGET` to enable docker for ansible tests
+##? Python target:    Use `WITH_PY_TARGET=X.Y make TARGET` to target a specific python version during ansible tests
+##? Coverage:         Use `WITH_COVERAGE=1 make TARGET` to enable coverage where it's doable
+##? Coverage report:  Use `WITH_COVERAGE_REPORT=... make TARGET` to define report type (xml, console or report, html)
+

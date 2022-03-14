@@ -20,10 +20,16 @@ on:
   schedule:
     - cron: '0 6 12 * *'
 env:
+  # Collection params
   C_NAMESPACE: yoanm
   C_NAME: utils
-  BUILD_DIR: '/tmp/build'
+  # Cache params
   CACHE_VERSION: 2022031305 # To be able to create a new cache (YYYYMMDDXX)
+  # Makefile options
+  BUILD_DIR: '/tmp/build'
+  WITH_COVERAGE: 1
+  WITH_DOCKER: 1
+  WITH_COVERAGE_REPORT: xml
 
 concurrency:
   group: ansible-unit-tests-${{ github.ref || github.head_ref }}
@@ -79,7 +85,7 @@ jobs:
         run: make test-python
 
       - name: Run unit tests
-        run: make test-ansible-units units_o="-v --color --docker --coverage --requirements"
+        run: make test-ansible-units
 
       # ansible-test support producing code coverage
       - name: Generate coverage report

@@ -14,10 +14,16 @@ on:
   schedule:
     - cron: '0 6 12 * *'
 env:
+  # Collection params
   C_NAMESPACE: yoanm
   C_NAME: utils
-  BUILD_DIR: '/tmp/build'
+  # Cache params
   CACHE_VERSION: 2022031305 # To be able to create a new cache (YYYYMMDDXX)
+  # Makefile options
+  BUILD_DIR: '/tmp/build'
+  WITH_COVERAGE: 1
+  WITH_DOCKER: 1
+  WITH_COVERAGE_REPORT: xml
 
 concurrency:
   group: ansible-sanity-tests-${{ github.ref || github.head_ref }}
@@ -73,7 +79,7 @@ jobs:
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
       - name: Run sanity tests
-        run: make test-ansible-sanity sanity_o="-v --docker --color --coverage --requirements"
+        run: make test-ansible-sanity
 
       # ansible-test support producing code coverage
       - name: Generate coverage report

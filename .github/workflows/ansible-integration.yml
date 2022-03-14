@@ -24,10 +24,16 @@ on:
   schedule:
     - cron: '0 10 26 * *'
 env:
+  # Collection params
   C_NAMESPACE: yoanm
   C_NAME: utils
-  BUILD_DIR: '/tmp/build'
+  # Cache params
   CACHE_VERSION: 2022031305 # To be able to create a new cache (YYYYMMDDXX)
+  # Makefile options
+  BUILD_DIR: '/tmp/build'
+  WITH_COVERAGE: 1
+  WITH_DOCKER: 1
+  WITH_COVERAGE_REPORT: xml
 
 concurrency:
   group: ansible-integration-tests-${{ github.ref || github.head_ref }}
@@ -37,6 +43,8 @@ jobs:
     name: Integration ${{ matrix.ansible }}+py${{ matrix.python }}
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      WITH_PY_TARGET: ${{ matrix.python }}
     strategy:
       max-parallel: 4
       fail-fast: ${{ github.ref != 'master' }}
@@ -140,7 +148,7 @@ jobs:
 
       # ansible-test support producing code coverage
       - name: Run integration tests
-        run: make test-ansible-integration integration_o="-v --requirements --color --retry-on-error --continue-on-error --diff --python ${{ matrix.python }} --docker --coverage"
+        run: make test-ansible-integration
 
       - name: Generate coverage report
         run: make test-ansible-coverage coverage_o="-v --requirements --group-by command --group-by version"
