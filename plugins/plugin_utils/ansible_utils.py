@@ -22,7 +22,7 @@ for part in _version_split:
         matches = re.match(r'^(\d+)(.*)\.$', part)
         if matches is not None and matches.groups() is not None:
             groups = list(matches.groups())  # type: List
-            if len(groups) > 1: # There is numeric chars at beginning
+            if len(groups) > 1:  # There is numeric chars at beginning
                 VERSION_PART.append(str(int(groups.pop(0))))
             VERSION_PART.append(str(groups.pop(0)))
         else:
