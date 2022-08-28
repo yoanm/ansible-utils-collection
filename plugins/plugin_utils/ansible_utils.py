@@ -19,7 +19,7 @@ for part in _version_split:
     try:
         VERSION_PART.append(str(int(part)))
     except ValueError:  # part may contain non-numeric chars (like 'rc1')
-        matches = re.match(r'^(\d+)(.*)\.$', part)
+        matches = re.match(r'^(\d+)(.*)$', part)
         if matches is not None and matches.groups() is not None:
             groups = list(matches.groups())  # type: List
             if len(groups) > 1:  # There is numeric chars at beginning

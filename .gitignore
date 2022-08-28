@@ -1,5 +1,6 @@
 build/*
 tests/output
 .mypy_cache
+__pycache__
 # Ignore collection built for galaxy
 *.tar.gz
