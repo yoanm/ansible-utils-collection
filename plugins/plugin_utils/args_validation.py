@@ -46,25 +46,8 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     valid, errors, updated_params = aav.validate()
 
     # Always return a list of error string
-    if not valid and not isinstance(errors, list):
-        errors = [errors]
-    elif valid:
+    if valid:
         errors = []
-
-    if ansible_utils.SHORT_VERSION_FLOAT > 2.10:
-        # Below 2.11, error message for unexpected param is buggy
-        # Loop over errors and re-format unexpected param error
-        for error_val in errors:
-            matches = re.match(__UNEXPECTED_ARG_ERROR_MATCH_PATTERN, error_val)
-            if matches is not None:
-                if matches.groups() is not None:
-                    groups = list(matches.groups())  # type: List
-                    new_val = __UNEXPECTED_ARG_ERROR_TEMPLATE % (name, to_native(groups[0]), to_native(groups[1]))
-                    errors[errors.index(error_val)] = new_val
-
-    # Always return a dict for updated_params
-    if not isinstance(updated_params, dict):
-        updated_params = dict()
 
     return valid, errors, updated_params
 
