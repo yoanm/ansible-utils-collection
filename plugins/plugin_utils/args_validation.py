@@ -46,9 +46,8 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     if valid:
         errors = []
 
-    # Add module name in error message
     for error_val in errors:
-        # Error message for unexpected param is buggy
+        # Error message for unexpected param is buggy (missing header)
         # Loop over errors and re-format unexpected param error
         matches = re.match(__UNEXPECTED_ARG_ERROR_MATCH_PATTERN, error_val)
         if matches is not None:
