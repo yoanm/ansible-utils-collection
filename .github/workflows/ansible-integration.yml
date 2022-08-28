@@ -92,7 +92,7 @@ jobs:
             python: '3.6'
           - ansible: stable-2.13 # 2.13.0+ requires python 3.8+
             python: '3.7'
-          - ansible: stable-2.12 # Test with python 3.8 and 3.10 (latest) only
+          - ansible: stable-2.13 # Test with python 3.8 and 3.10 (latest) only
             python: '3.9'
           ## devel => python 3.9 and 3.10 (latest)
           - ansible: devel # devel requires python 3.9+
@@ -103,6 +103,8 @@ jobs:
             python: '3.6'
           - ansible: devel # devel requires python 3.9+
             python: '3.7'
+          - ansible: devel # Test with python 3.8 and 3.10 (latest) only
+            python: '3.9'
 
     steps:
       - name: Check out code
