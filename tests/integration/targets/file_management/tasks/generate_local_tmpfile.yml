@@ -14,7 +14,7 @@
         local_tmpfile_content: "{{ local_tmpfile_content }}"
       register: test_generate_local_tmpfile_res
 
-    - name: Check generate local tmpfile result
+    - name: Check test_generate_local_tmpfile_res result
       assert:
         that:
           - "test_generate_local_tmpfile_res | type_debug == 'dict'"
@@ -31,7 +31,7 @@
         content: "{{ local_tmpfile_content }}"
       register: file_content_step_res
 
-    - name: Validate previous step
+    - name: Check file_content_step_res result
       assert:
         that:
           - "file_content_step_res['failed'] == false"

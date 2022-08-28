@@ -5,15 +5,12 @@ __metaclass__ = type
 
 import re
 
-from ansible.module_utils.common.text.converters import to_native
 from ansible_collections.ansible.utils.plugins.module_utils.common.argspec_validate import AnsibleArgSpecValidator
-
-from . import ansible_utils
 
 # Hack to avoid loading "typing" module at runtime (issue with sanity tests on python 2.7) while keeping MyPy happy
 MYPY = False
 if MYPY:
-    from typing import Dict, Text, List
+    from typing import Dict, Text
     from .args_validation_typing import (
         ArgSpecSchema,
         ArgSpecOptionalSchema,
@@ -23,8 +20,8 @@ if MYPY:
         PluginArgSpecReturnRes,
     )
 
-__UNEXPECTED_ARG_ERROR_MATCH_PATTERN = r'^(\w+(?:, \w+)?). Supported parameters include: (.+)\.$'
-__UNEXPECTED_ARG_ERROR_TEMPLATE = "Unsupported parameters for '%s' module: %s. Supported parameters include: %s."
+__UNEXPECTED_ARG_ERROR_MATCH_PATTERN = r'^\w+(?:, \w+)?. Supported parameters include: .+\.$'
+__UNEXPECTED_ARG_ERROR_TEMPLATE = "Unsupported parameters: %s"
 
 
 def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=None, other_args=None):
@@ -51,11 +48,11 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
 
     # Add module name in error message
     for error_val in errors:
+        # Error message for unexpected param is buggy
+        # Loop over errors and re-format unexpected param error
         matches = re.match(__UNEXPECTED_ARG_ERROR_MATCH_PATTERN, error_val)
-        if matches is not None and matches.groups() is not None:
-                groups = list(matches.groups())  # type: List
-                new_val = __UNEXPECTED_ARG_ERROR_TEMPLATE % (name, to_native(groups[0]), to_native(groups[1]))
-                errors[errors.index(error_val)] = new_val
+        if matches is not None:
+            errors[errors.index(error_val)] = __UNEXPECTED_ARG_ERROR_TEMPLATE % error_val
 
     return valid, errors, updated_params
 

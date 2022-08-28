@@ -6,7 +6,7 @@
   simple_action:
   register: test_simple_action_res
 
-- name: Check simple action result
+- name: Check test_simple_action_res result
   assert:
     that:
       - "test_simple_action_res | type_debug == 'dict'"
@@ -21,7 +21,7 @@
   simple_action_with_param:
   register: test_simple_action_with_param_with_missing_param_res
 
-- name: Check simple action with param result
+- name: Check test_simple_action_with_param_with_missing_param_res result
   assert:
     that:
       - "test_simple_action_with_param_with_missing_param_res | type_debug == 'dict'"
@@ -39,7 +39,7 @@
     unexpected_param: 'my_unexpected_param'
   register: test_simple_action_with_param_with_unexpected_param
 
-- name: Check simple action with param result
+- name: Check test_simple_action_with_param_with_unexpected_param result
   assert:
     that:
       - "test_simple_action_with_param_with_unexpected_param | type_debug == 'dict'"
@@ -47,7 +47,7 @@
       - "test_simple_action_with_param_with_unexpected_param['skipped'] == false"
       - "test_simple_action_with_param_with_unexpected_param['failed'] == true"
       - "'Errors during argspec validation for simple_action_with_param plugin' == test_simple_action_with_param_with_unexpected_param['msg']"
-      - "['Unsupported parameters for \\'simple_action_with_param\\' module: unexpected_param. Supported parameters include: name.'] == test_simple_action_with_param_with_unexpected_param['errors']"
+      - "['Unsupported parameters: unexpected_param. Supported parameters include: name.'] == test_simple_action_with_param_with_unexpected_param['errors']"
 
 - name: Test simple action with exception
   ignore_errors: true
@@ -55,7 +55,7 @@
   simple_action_with_exception:
   register: test_simple_action_with_exception
 
-- name: Check simple action with exception result
+- name: Check test_simple_action_with_exception result
   assert:
     that:
       - "test_simple_action_with_exception | type_debug == 'dict'"
