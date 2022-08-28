@@ -62,6 +62,7 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
+          - '3.11'
         exclude:
           ## 2.11.0+ => python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
           - ansible: stable-2.11 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements
@@ -72,6 +73,8 @@ jobs:
             python: '3.8'
           - ansible: stable-2.11 # ansible-test supports Python 3.10+ for 2.12+ only
             python: '3.10'
+          - ansible: stable-2.11 # ansible-test supports Python 3.10+ for 2.12+ only
+            python: '3.11'
           ## 2.12.0+ => python 3.8 and 3.10 (latest)
           - ansible: stable-2.12 # 2.12.0+ requires python 3.8+
             python: '2.7'
@@ -83,6 +86,8 @@ jobs:
             python: '3.7'
           - ansible: stable-2.12 # Test with python 3.8 and 3.10 (latest) only
             python: '3.9'
+          - ansible: stable-2.12 # Test with python 3.8 and 3.10 (latest) only
+            python: '3.11'
           ## 2.13.0+ => python 3.8 and 3.10 (latest)
           - ansible: stable-2.13 # 2.13.0+ requires python 3.8+
             python: '2.7'
@@ -94,7 +99,9 @@ jobs:
             python: '3.7'
           - ansible: stable-2.13 # Test with python 3.8 and 3.10 (latest) only
             python: '3.9'
-          ## devel => python 3.9 and 3.10 (latest)
+          - ansible: stable-2.13 # Test with python 3.8 and 3.10 (latest) only
+            python: '3.11'
+          ## devel => python 3.9, 3.10 (latest) and 3.11 (devel)
           - ansible: devel # devel requires python 3.9+
             python: '2.7'
           - ansible: devel # devel requires python 3.9+
@@ -103,8 +110,8 @@ jobs:
             python: '3.6'
           - ansible: devel # devel requires python 3.9+
             python: '3.7'
-          - ansible: devel # Test with python 3.8 and 3.10 (latest) only
-            python: '3.9'
+          - ansible: devel # Test with python 3.9, 3.10 (latest) and 3.11 (devel) only
+            python: '3.8'
 
     steps:
       - name: Check out code
