@@ -24,7 +24,7 @@ if MYPY:
     )
 
 __UNEXPECTED_ARG_ERROR_MATCH_PATTERN = r'^(\w+(?:, \w+)?). Supported parameters include: (.+)\.$'
-__UNEXPECTED_ARG_ERROR_TEMPLATE = "Unsupported parameters for '%s' module: %s Supported parameters include: %s"
+__UNEXPECTED_ARG_ERROR_TEMPLATE = "Unsupported parameters for '%s' module: %s. Supported parameters include: %s."
 
 
 def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=None, other_args=None):
@@ -48,6 +48,14 @@ def check_argspec(name, args, schema, schema_format="doc", schema_conditionals=N
     # Always return a list of error string
     if valid:
         errors = []
+
+    # Add module name in error message
+    for error_val in errors:
+        matches = re.match(__UNEXPECTED_ARG_ERROR_MATCH_PATTERN, error_val)
+        if matches is not None and matches.groups() is not None:
+                groups = list(matches.groups())  # type: List
+                new_val = __UNEXPECTED_ARG_ERROR_TEMPLATE % (name, to_native(groups[0]), to_native(groups[1]))
+                errors[errors.index(error_val)] = new_val
 
     return valid, errors, updated_params
 
