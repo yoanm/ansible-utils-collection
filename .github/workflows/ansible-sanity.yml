@@ -35,10 +35,9 @@ jobs:
       fail-fast: false
       matrix:
         ansible:
-#          # - stable-2.9 # Only if your collection supports Ansible 2.9
-          - stable-2.10
           - stable-2.11
           - stable-2.12
+          - stable-2.13
           - devel
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +49,7 @@ jobs:
         with:
           # it is just required to run that once as "ansible-test sanity" in the docker image
           # will run on all python versions it supports.
-          python-version: 3.8
+          python-version: 3.9
 
       # Install the head of the given branch (devel, stable-2.10)
       - name: Install ansible (${{ matrix.ansible }})

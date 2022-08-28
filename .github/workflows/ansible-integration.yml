@@ -49,70 +49,31 @@ jobs:
       max-parallel: 4
       fail-fast: ${{ github.ref != 'master' }}
       matrix:
-        ansible:
-#          # - stable-2.9 # Only if your collection supports Ansible 2.9
-          - stable-2.10
-          - stable-2.11
-          - stable-2.12
-          - devel
-        python:
-          - '2.7'
-          - '3.5'
-          - '3.6'
-          - '3.7'
-          - '3.8'
-          - '3.9'
-          - '3.10'
-        exclude:
-          ## 2.9.0+ => python 2.7, 3.5 and 3.8 (latest due to ansible-test requirements)
-          - ansible: stable-2.9 # Test with python 2.7, 3.5 and 3.8 (latest, due to ansible-test requirements)
-            python: '3.6'
-          - ansible: stable-2.9 # Test with python 2.7, 3.5 and 3.8 (latest, due to ansible-test requirements)
-            python: '3.7'
-          - ansible: stable-2.9 # ansible-test doesn't support Python 3.9 for Ansible 2.9
-            python: '3.9'
-          - ansible: stable-2.9 # ansible-test supports Python 3.10+ for 2.12+ only
-            python: '3.10'
-          ## 2.10.0+ => python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
-          - ansible: stable-2.10 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
-            python: '3.6'
-          - ansible: stable-2.10 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
-            python: '3.7'
-          - ansible: stable-2.10 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
-            python: '3.8'
-          - ansible: stable-2.10 # ansible-test supports Python 3.10+ for 2.12+ only
-            python: '3.10'
-          ## 2.11.0+ => python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
-          - ansible: stable-2.11 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements
-            python: '3.6'
-          - ansible: stable-2.11 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements
-            python: '3.7'
-          - ansible: stable-2.11 # Test with python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements
-            python: '3.8'
-          - ansible: stable-2.11 # ansible-test supports Python 3.10+ for 2.12+ only
-            python: '3.10'
-          ## 2.12.0+ => python 3.8 and 3.10 (latest)
-          - ansible: stable-2.12 # 2.12.0+ requires python 3.8+
+        include:
+          ## 2.11.0+ (requires python 2.7+) => python 2.7, 3.5 and 3.9 (latest, due to ansible-test requirements)
+          - ansible: stable-2.11
             python: '2.7'
-          - ansible: stable-2.12 # 2.12.0+ requires python 3.8+
+          - ansible: stable-2.11
             python: '3.5'
-          - ansible: stable-2.12 # 2.12.0+ requires python 3.8+
-            python: '3.6'
-          - ansible: stable-2.12 # 2.12.0+ requires python 3.8+
-            python: '3.7'
-          - ansible: stable-2.12 # Test with python 3.8 and 3.10 (latest) only
+          - ansible: stable-2.11
             python: '3.9'
-          ## devel => python 3.8 and 3.10 (latest)
-          - ansible: devel # devel requires python 3.8+
-            python: '2.7'
-          - ansible: devel # devel requires python 3.8+
-            python: '3.5'
-          - ansible: devel # devel requires python 3.8+
-            python: '3.6'
-          - ansible: devel # devel requires python 3.8+
-            python: '3.7'
-          - ansible: devel # Test with python 3.8 and 3.10 (latest)
+          ## 2.12.0+ (requires python 3.8+) => python 3.8 and 3.10 (latest)
+          - ansible: stable-2.12
+            python: '3.8'
+          - ansible: stable-2.12
+            python: '3.10'
+          ## 2.13.0+ (requires python 3.8+) => python 3.8 and 3.10 (latest)
+          - ansible: stable-2.13
+            python: '3.8'
+          - ansible: stable-2.13
+            python: '3.10'
+          ## devel (requires python 3.9+) => python 3.9, 3.10 (latest) and 3.11 (devel)
+          - ansible: devel
             python: '3.9'
+          - ansible: devel
+            python: '3.10'
+          - ansible: devel
+            python: '3.11'
 
     steps:
       - name: Check out code

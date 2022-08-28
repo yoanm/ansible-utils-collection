@@ -7,13 +7,13 @@
     simple_lookup_var: "{{ lookup('simple_lookup', 'a') }}"
   register: test_simple_lookup_res
 
-- name: Check simple lookup result
+- name: Check simple_lookup_var
   assert:
     that:
       - "simple_lookup_var | type_debug == 'dict'"
       - "{'kwargs': {}, 'terms': ['a']} == simple_lookup_var"
 
-- name: Check simple lookup result
+- name: Check test_simple_lookup_res result
   assert:
     that:
       - "test_simple_lookup_res | type_debug == 'dict'"
