@@ -5,6 +5,7 @@
 
 name: Ansible unit tests
 on:
+  workflow_dispatch:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
@@ -34,6 +35,7 @@ env:
 concurrency:
   group: ansible-unit-tests-${{ github.ref || github.head_ref }}
   cancel-in-progress: ${{ github.ref != 'master' }}
+
 jobs:
   sanity:
     name: Unit ${{ matrix.ansible }}

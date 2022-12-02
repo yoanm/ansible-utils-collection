@@ -4,11 +4,17 @@
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
 name: Ansible sanity tests
 on:
+  workflow_dispatch:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
-  # And for all Pull Requests
+  # And for Pull Requests if a related path is updated
   pull_request:
+    paths:
+      - plugins/**
+      - tests/mocks/**
+      - tests/sanity/**
+      - .github/workflows/ansible-sanity.yml
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
   schedule:

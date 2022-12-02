@@ -8,6 +8,7 @@
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 name: Ansible integration tests
 on:
+  workflow_dispatch:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
