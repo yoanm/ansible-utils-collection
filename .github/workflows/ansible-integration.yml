@@ -8,7 +8,6 @@
 # https://github.com/ansible-collections/community.zabbix/tree/master/.github/workflows
 name: Ansible integration tests
 on:
-  workflow_dispatch:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
@@ -19,6 +18,7 @@ on:
       - plugins/**
       - tests/mocks/**
       - tests/integration/**
+      - tests/requirements.txt
       - .github/workflows/ansible-integration.yml
   # Run once a month (at 10:00 UTC the 26th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version

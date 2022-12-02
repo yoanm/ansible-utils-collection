@@ -5,7 +5,6 @@
 
 name: Ansible unit tests
 on:
-  workflow_dispatch:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
@@ -15,6 +14,7 @@ on:
       - plugins/**
       - tests/mocks/**
       - tests/unit/**
+      - tests/requirements.txt
       - .github/workflows/ansible-units.yml
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
