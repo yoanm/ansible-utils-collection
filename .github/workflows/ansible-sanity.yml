@@ -48,10 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           # it is just required to run that once as "ansible-test sanity" in the docker image
           # will run on all python versions it supports.
@@ -92,7 +92,7 @@ jobs:
 
       # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
       - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           name: "sanity-tests-${{ matrix.ansible }}"
           flags: "sanitytests,ansible-${{ matrix.ansible }}"
