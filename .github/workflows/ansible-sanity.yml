@@ -7,8 +7,14 @@ on:
   # Run CI against all pushes to main branch (direct commits, also merged PRs)
   push:
     branches: [master]
-  # And for all Pull Requests
+  # And for Pull Requests if a related path is updated
   pull_request:
+    paths:
+      - plugins/**
+      - tests/mocks/**
+      - tests/sanity/**
+      - tests/requirements.txt
+      - .github/workflows/ansible-sanity.yml
   # Run once a month (at 06:00 UTC the 12th)
   # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-core version
   schedule:
@@ -42,14 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           # it is just required to run that once as "ansible-test sanity" in the docker image
           # will run on all python versions it supports.
-          python-version: 3.9
+          python-version: '3.10'
 
       # Install the head of the given branch (devel, stable-2.10)
       - name: Install ansible (${{ matrix.ansible }})
@@ -66,7 +72,7 @@ jobs:
       - name: Cache Build directory
         # Deactivate cache for 2.9 and 2.10 as there is no upgrade mechanism (--upgrade) !
         if: ${{ matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{env.BUILD_DIR}}
           key: ${{env.CACHE_VERSION}}-sanity-tests-build_dir-cache-ansible-${{ github.base_ref || github.ref }}-${{ matrix.ansible }}
@@ -86,7 +92,7 @@ jobs:
 
       # See the reports at https://codecov.io/gh/yoanm/ansible-utils-collection
       - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           name: "sanity-tests-${{ matrix.ansible }}"
           flags: "sanitytests,ansible-${{ matrix.ansible }}"
